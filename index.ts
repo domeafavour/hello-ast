@@ -141,6 +141,17 @@ type Wrapper = {
   parent: Wrapper | null;
 };
 
+function createNumberLiteral(value: string): NumberLiteral {
+  return { type: 'NumberLiteral', value };
+}
+
+function createCallExpression(
+  name: NameValue,
+  params: CallExpression['params']
+): CallExpression {
+  return { type: 'CallExpression', name, params };
+}
+
 function parser(tokens: Token[]): Program {
   const ast: Program = {
     type: 'program',
@@ -157,22 +168,35 @@ function parser(tokens: Token[]): Program {
     const token = tokens[i];
     if (token.type === 'name') {
       // new wrapper
-      let expression: CallExpression = {
-        type: 'CallExpression',
-        name: token.value,
-        params: wrapper.params,
-      };
+      let expression: CallExpression = createCallExpression(
+        token.value,
+        wrapper.params
+      );
+
+      // already has a number or call expression on the left
       if (!wrapper.name) {
-        ast.body.push(expression);
+        if (!wrapper.parent) {
+          ast.body.push(expression);
+        } else {
+          wrapper.parent.params.push(expression);
+        }
         wrapper.params = expression.params;
         wrapper.name = expression.name;
       }
     } else if (token.type === 'number') {
-      let numberLiteral: NumberLiteral = {
-        type: 'NumberLiteral',
-        value: token.value,
-      };
-      wrapper.params.push(numberLiteral);
+      wrapper.params.push(createNumberLiteral(token.value));
+    } else if (token.type === 'paren') {
+      if (token.value === LEFT_PAREN) {
+        wrapper.parent = {
+          ...wrapper,
+        };
+        wrapper.name = null;
+        wrapper.params = [];
+      } else if (token.value === RIGHT_PAREN) {
+        if (wrapper.parent) {
+          wrapper = wrapper.parent;
+        }
+      }
     }
   }
 
@@ -216,7 +240,10 @@ function parser(tokens: Token[]): Program {
 //     },
 //   ],
 // };
-const myTokens = tokenizer('1 + (2 + 3)');
+// const myTokens = tokenizer('1 + (2 + 3)');
+// const ast = parser(myTokens);
+
+const myTokens = tokenizer('1 + (2 + (3 + 4)) + 5 ');
 const ast = parser(myTokens);
 
 console.log(JSON.stringify(ast, null, 2));
