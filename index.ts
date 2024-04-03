@@ -32,18 +32,22 @@ type Token = NumberToken | NameToken | ParenToken;
 const NUM_RE = /[0-9]/;
 const WHITESPACE = /\s/;
 
+const LEFT_PAREN = '(';
+const RIGHT_PAREN = ')';
+const ADD = 'add';
+
 function tokenizer(input: string) {
   let current = 0;
   const tokens: Token[] = [];
   while (current < input.length) {
     let char = input[current];
-    if (char === '(') {
-      tokens.push({ type: 'paren', value: '(' });
+    if (char === LEFT_PAREN) {
+      tokens.push({ type: 'paren', value: LEFT_PAREN });
       current++;
       continue;
     }
-    if (char === ')') {
-      tokens.push({ type: 'paren', value: ')' });
+    if (char === RIGHT_PAREN) {
+      tokens.push({ type: 'paren', value: RIGHT_PAREN });
       current++;
       continue;
     }
@@ -57,7 +61,7 @@ function tokenizer(input: string) {
       continue;
     }
     if (char === '+') {
-      tokens.push({ type: 'name', value: 'add' });
+      tokens.push({ type: 'name', value: ADD });
       current++;
       continue;
     }
