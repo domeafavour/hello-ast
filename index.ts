@@ -135,106 +135,44 @@ type Program = {
 //   ],
 // };
 
+type Wrapper = {
+  name: NameValue | null;
+  params: CallExpression['params'];
+  parent: Wrapper | null;
+};
+
 function parser(tokens: Token[]): Program {
-  // function walk(): NumberLiteral | CallExpression {
-  //   const token = tokens[current];
-  //   if (token.type === 'number') {
-  //     const numberLiteral: NumberLiteral = {
-  //       type: 'NumberLiteral',
-  //       value: token.value,
-  //     };
-
-  //     // should be `add`, `subtract` or `left paren`
-  //     const next = tokens[++current];
-
-  //     if (next.type === 'name') {
-  //       if (currentExpression && currentExpression.name === next.value) {
-  //         // 1 + 2 : add(1, 2) => 1 + 2 + 3 : add(1, 2, 3)
-  //         // 5 - 2 : subtract(5, 2) => 5 - 2 - 1 : subtract(5, 2, 1)
-  //         if (currentExpression.name === next.value) {
-  //           currentExpression.params.push(numberLiteral);
-  //           return currentExpression;
-  //         }
-
-  //         // 1 + 2 : add(1, 2) => 1 + 2 - 3 : subtract(add(1, 2), 3)
-  //         let expression: CallExpression = {
-  //           type: 'CallExpression',
-  //           name: next.value,
-  //           params: [currentExpression, numberLiteral],
-  //         };
-  //         currentExpression = expression;
-  //         return expression;
-  //       }
-  //       let expression: CallExpression = {
-  //         type: 'CallExpression',
-  //         name: next.value,
-  //         params: [numberLiteral],
-  //       };
-  //       currentExpression = expression;
-  //       return expression;
-  //     } else if (next.type === 'paren') {
-  //       //
-  //       // let expression: CallExpression = {
-  //       //   type: 'CallExpression',
-  //       //   name: ADD,
-  //       //   params: [numberLiteral],
-  //       // }
-  //       if (next.value === LEFT_PAREN) {
-  //         // skip left paren
-  //         current++;
-  //         if (currentExpression) {
-  //           currentExpression.params.push(walk());
-  //         }
-  //       }
-  //     }
-
-  //     throw new TypeError('Unknown token type: ' + next.type);
-  //   }
-
-  //   if (token.type === 'name') {
-  //     let node: CallExpression = {
-  //       type: 'CallExpression',
-  //       name: token.value,
-  //       params: [],
-  //     };
-  //     return node;
-  //   }
-
-  //   throw new TypeError('Unknown token type: ' + token.type);
-  // }
-
   const ast: Program = {
     type: 'program',
     body: [],
   };
 
-  let leftNumberOrExpression: NumberLiteral | CallExpression | null = null;
-  let currentExpression: CallExpression | null = null;
+  let wrapper: Wrapper = {
+    name: null,
+    params: [],
+    parent: null,
+  };
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     if (token.type === 'name') {
+      // new wrapper
       let expression: CallExpression = {
         type: 'CallExpression',
         name: token.value,
-        params: [],
+        params: wrapper.params,
       };
-      if (leftNumberOrExpression) {
-        expression.params.push(leftNumberOrExpression);
-      }
-      if (!currentExpression) {
-        currentExpression = expression;
+      if (!wrapper.name) {
         ast.body.push(expression);
+        wrapper.params = expression.params;
+        wrapper.name = expression.name;
       }
     } else if (token.type === 'number') {
       let numberLiteral: NumberLiteral = {
         type: 'NumberLiteral',
         value: token.value,
       };
-      if (currentExpression) {
-        currentExpression.params.push(numberLiteral);
-      }
-      leftNumberOrExpression = numberLiteral;
+      wrapper.params.push(numberLiteral);
     }
   }
 
@@ -255,7 +193,30 @@ function parser(tokens: Token[]): Program {
 //     },
 //   ],
 // };
-const myTokens = tokenizer('1 + 2 + 3');
+// const myTokens = tokenizer('1 + 2 + 3');
+// const ast = parser(myTokens);
+
+// const program: Program = {
+//   type: 'program',
+//   body: [
+//     {
+//       type: 'CallExpression',
+//       name: ADD,
+//       params: [
+//         { type: 'NumberLiteral', value: '1' },
+//         {
+//           type: 'CallExpression',
+//           name: ADD,
+//           params: [
+//             { type: 'NumberLiteral', value: '2' },
+//             { type: 'NumberLiteral', value: '3' },
+//           ],
+//         },
+//       ],
+//     },
+//   ],
+// };
+const myTokens = tokenizer('1 + (2 + 3)');
 const ast = parser(myTokens);
 
 console.log(JSON.stringify(ast, null, 2));
