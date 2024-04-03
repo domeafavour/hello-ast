@@ -1,0 +1,10 @@
+{
+  "name": "hello-ast",
+  "version": "1.0.0",
+  "description": "AST practices",
+  "main": "index.ts",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
