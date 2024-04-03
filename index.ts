@@ -19,12 +19,12 @@ type NameValue = typeof ADD | typeof SUBTRACT;
 
 type NameToken = {
   type: 'name';
-  value: string;
+  value: NameValue;
 };
 
 type ParenToken = {
   type: 'paren';
-  value: '(' | ')';
+  value: typeof LEFT_PAREN | typeof RIGHT_PAREN;
 };
 
 type Token = NumberToken | NameToken | ParenToken;
