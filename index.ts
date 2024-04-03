@@ -2,12 +2,20 @@
 // parser(tokens: Token[]): AST
 // transformer(ast: AST): newAST
 
-// 1 + (2 + 31)
+const NUM_RE = /[0-9]/;
+const WHITESPACE = /\s/;
+
+const LEFT_PAREN = '(';
+const RIGHT_PAREN = ')';
+const ADD = 'add';
+const SUBTRACT = 'subtract';
 
 type NumberToken = {
   type: 'number';
   value: string;
 };
+
+type NameValue = typeof ADD | typeof SUBTRACT;
 
 type NameToken = {
   type: 'name';
@@ -27,14 +35,10 @@ type Token = NumberToken | NameToken | ParenToken;
 // { type: 'number', value: '2' },
 // { type: 'name', value: 'add' },
 // { type: 'number', value: '31' },
+// { type: 'name', value: 'subtract' },
 // { type: 'paren', value: ')' }
-
-const NUM_RE = /[0-9]/;
-const WHITESPACE = /\s/;
-
-const LEFT_PAREN = '(';
-const RIGHT_PAREN = ')';
-const ADD = 'add';
+// { type: 'name', value: 'add' },
+// { type: 'number', value: '5' },
 
 function tokenizer(input: string) {
   let current = 0;
@@ -62,6 +66,11 @@ function tokenizer(input: string) {
     }
     if (char === '+') {
       tokens.push({ type: 'name', value: ADD });
+      current++;
+      continue;
+    }
+    if (char === '-') {
+      tokens.push({ type: 'name', value: SUBTRACT });
       current++;
       continue;
     }
