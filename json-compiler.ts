@@ -1,6 +1,7 @@
 type ParenToken = { type: 'paren'; value: '{' | '}' };
 type ColonToken = { type: 'colon'; value: ':' };
 type CommaToken = { type: 'comma'; value: ',' };
+type SquareBracketToken = { type: 'square-bracket'; value: '[' | ']' };
 type StringLiteralToken = { type: 'string'; value: string };
 type NumberLiteralToken = { type: 'number'; value: string };
 type BooleanLiteralToken = { type: 'boolean'; value: 'true' | 'false' };
@@ -11,6 +12,7 @@ type JSONToken =
   | ParenToken
   | ColonToken
   | CommaToken
+  | SquareBracketToken
   | StringLiteralToken
   | NumberLiteralToken
   | BooleanLiteralToken
@@ -42,6 +44,10 @@ function isCommaToken(token: any): token is CommaToken {
   return token.type === 'comma';
 }
 
+function isSquareBracketToken(token: any): token is SquareBracketToken {
+  return token.type === 'square-bracket';
+}
+
 const TRUE_LITERAL = 'true';
 const FALSE_LITERAL = 'false';
 const NULL_LITERAL = 'null';
@@ -55,6 +61,12 @@ function tokenizer(input: string): JSONToken[] {
 
     if (char === '{' || char === '}') {
       tokens.push({ type: 'paren', value: char });
+      current++;
+      continue;
+    }
+
+    if (char === '[' || char === ']') {
+      tokens.push({ type: 'square-bracket', value: char });
       current++;
       continue;
     }
@@ -101,7 +113,10 @@ function tokenizer(input: string): JSONToken[] {
         tokens.push({ type: 'property', value });
         current++;
         continue;
-      } else if (isColonToken(previous)) {
+      } else if (
+        isColonToken(previous) ||
+        (isSquareBracketToken(previous) && previous.value === '[')
+      ) {
         // string literal
         let value = '';
         while (input[++current] !== '"') {
@@ -164,7 +179,15 @@ const jsonTokens = tokenizer(
     married: true,
     teenager: false,
     age: 22,
-    hobbies: null,
+    nullValue: null,
+    hobbies: ['running', 'swimming'],
+    friends: [
+      {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        bff: { firstName: 'Mary', lastName: 'Jane' },
+      },
+    ],
   })
 );
 
