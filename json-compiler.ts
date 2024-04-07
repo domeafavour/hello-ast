@@ -44,6 +44,7 @@ function isCommaToken(token: any): token is CommaToken {
 
 const TRUE_LITERAL = 'true';
 const FALSE_LITERAL = 'false';
+const NULL_LITERAL = 'null';
 
 function tokenizer(input: string): JSONToken[] {
   const tokens: JSONToken[] = [];
@@ -140,6 +141,16 @@ function tokenizer(input: string): JSONToken[] {
       tokens.push({ type: 'boolean', value: 'false' });
       continue;
     }
+
+    // `n`ull
+    if (char === 'n') {
+      let value = char;
+      while (input[++current] === NULL_LITERAL[value.length]) {
+        value += input[current];
+      }
+      tokens.push({ type: 'null', value: 'null' });
+      continue;
+    }
   }
 
   return tokens;
@@ -153,6 +164,7 @@ const jsonTokens = tokenizer(
     married: true,
     teenager: false,
     age: 22,
+    hobbies: null,
   })
 );
 
