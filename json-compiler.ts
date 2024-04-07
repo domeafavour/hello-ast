@@ -28,6 +28,7 @@ type JSONToken =
 // { type: 'paren', value: '}' }
 
 const WHITESPACE = /\s/;
+const NUMBER = /[0-9]/;
 
 function isParenToken(token: any): token is ParenToken {
   return token.type === 'paren';
@@ -107,13 +108,27 @@ function tokenizer(input: string): JSONToken[] {
         continue;
       }
     }
+
+    if (NUMBER.test(char)) {
+      let value = char;
+      while (NUMBER.test(input[++current])) {
+        value += input[current];
+      }
+      tokens.push({ type: 'number', value });
+      continue;
+    }
   }
 
   return tokens;
 }
 
 const jsonTokens = tokenizer(
-  JSON.stringify({ firstName: 'John', lastName: 'Doe' })
+  JSON.stringify({
+    id: 1,
+    firstName: 'John',
+    lastName: 'Doe',
+    age: 22,
+  })
 );
 
 console.log(jsonTokens);
