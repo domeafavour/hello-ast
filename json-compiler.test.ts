@@ -107,6 +107,25 @@ describe('json-parser', () => {
     ] as JSONNode[]);
   });
 
+  it('should contain a json object node with nested object', () => {
+    expect(
+      parser(tokenizer('{"name":"John","address":{"city":"New York"}}'))
+    ).toEqual([
+      {
+        type: 'object',
+        properties: {
+          name: { type: 'string', value: 'John' },
+          address: {
+            type: 'object',
+            properties: {
+              city: { type: 'string', value: 'New York' },
+            },
+          },
+        },
+      },
+    ] as JSONNode[]);
+  });
+
   it('should contain a json array node', () => {
     expect(parser(tokenizer('[1,2,3]'))).toEqual([
       {
