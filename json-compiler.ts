@@ -48,6 +48,44 @@ function isSquareBracketToken(token: any): token is SquareBracketToken {
   return token.type === 'square-bracket';
 }
 
+function createStringLiteralToken(value: string): StringLiteralToken {
+  return { type: 'string', value };
+}
+
+function createParenToken(value: '{' | '}'): ParenToken {
+  return { type: 'paren', value };
+}
+
+function createSquareBracketToken(value: '[' | ']'): SquareBracketToken {
+  return { type: 'square-bracket', value };
+}
+
+function createColonToken(): ColonToken {
+  return { type: 'colon', value: ':' };
+}
+
+function createCommaToken(): CommaToken {
+  return { type: 'comma', value: ',' };
+}
+
+function createPropertyToken(value: string): PropertyToken {
+  return { type: 'property', value };
+}
+
+function createNumberLiteralToken(value: string): NumberLiteralToken {
+  return { type: 'number', value };
+}
+
+function createBooleanLiteralToken(
+  value: 'true' | 'false'
+): BooleanLiteralToken {
+  return { type: 'boolean', value };
+}
+
+function createNullLiteralToken(): NullLiteralToken {
+  return { type: 'null', value: 'null' };
+}
+
 const TRUE_LITERAL = 'true';
 const FALSE_LITERAL = 'false';
 const NULL_LITERAL = 'null';
@@ -62,7 +100,7 @@ export function tokenizer(input: string): JSONToken[] {
     while (input[++current] !== '"') {
       value += input[current];
     }
-    tokens.push({ type: 'string', value });
+    tokens.push(createStringLiteralToken(value));
     current++;
   }
 
@@ -70,13 +108,13 @@ export function tokenizer(input: string): JSONToken[] {
     const char = input[current];
 
     if (char === '{' || char === '}') {
-      tokens.push({ type: 'paren', value: char });
+      tokens.push(createParenToken(char));
       current++;
       continue;
     }
 
     if (char === '[' || char === ']') {
-      tokens.push({ type: 'square-bracket', value: char });
+      tokens.push(createSquareBracketToken(char));
       current++;
       continue;
     }
@@ -95,13 +133,13 @@ export function tokenizer(input: string): JSONToken[] {
     }
 
     if (char === ':') {
-      tokens.push({ type: 'colon', value: ':' });
+      tokens.push(createColonToken());
       current++;
       continue;
     }
 
     if (char === ',') {
-      tokens.push({ type: 'comma', value: ',' });
+      tokens.push(createCommaToken());
       current++;
       continue;
     }
@@ -124,7 +162,7 @@ export function tokenizer(input: string): JSONToken[] {
         while (input[++current] !== '"') {
           value += input[current];
         }
-        tokens.push({ type: 'property', value });
+        tokens.push(createPropertyToken(value));
         current++;
         continue;
       } else if (
@@ -142,7 +180,7 @@ export function tokenizer(input: string): JSONToken[] {
       while (NUMBER.test(input[++current])) {
         value += input[current];
       }
-      tokens.push({ type: 'number', value });
+      tokens.push(createNumberLiteralToken(value));
       continue;
     }
 
@@ -155,7 +193,7 @@ export function tokenizer(input: string): JSONToken[] {
       ) {
         value += input[current];
       }
-      tokens.push({ type: 'boolean', value: 'true' });
+      tokens.push(createBooleanLiteralToken('true'));
       continue;
     }
 
@@ -168,7 +206,7 @@ export function tokenizer(input: string): JSONToken[] {
       ) {
         value += input[current];
       }
-      tokens.push({ type: 'boolean', value: 'false' });
+      tokens.push(createBooleanLiteralToken('false'));
       continue;
     }
 
@@ -181,7 +219,7 @@ export function tokenizer(input: string): JSONToken[] {
       ) {
         value += input[current];
       }
-      tokens.push({ type: 'null', value: 'null' });
+      tokens.push(createNullLiteralToken());
       continue;
     }
   }
@@ -207,6 +245,30 @@ export type JSONNode =
   | JSONObjectNode
   | JSONArrayNode;
 
+function createJSONBooleanNode(tokenValue: 'true' | 'false'): JSONBooleanNode {
+  return { type: 'boolean', value: tokenValue === 'true' };
+}
+
+function createJSONNullNode(): JSONNullNode {
+  return { type: 'null', value: null };
+}
+
+function createJSONNumberNode(tokenValue: string): JSONNumberNode {
+  return { type: 'number', value: +tokenValue };
+}
+
+function createJSONStringNode(tokenValue: string): JSONStringNode {
+  return { type: 'string', value: tokenValue };
+}
+
+function createEmptyJSONObjectNode(): JSONObjectNode {
+  return { type: 'object', properties: {} };
+}
+
+function createEmptyJSONArrayNode(): JSONArrayNode {
+  return { type: 'array', items: [] };
+}
+
 export function parser(tokens: JSONToken[]): JSONNode[] {
   const nodes: JSONNode[] = [];
   let current = 0;
@@ -216,29 +278,26 @@ export function parser(tokens: JSONToken[]): JSONNode[] {
 
     if (token.type === 'boolean') {
       current++;
-      return { type: 'boolean', value: token.value === 'true' };
+      return createJSONBooleanNode(token.value);
     }
 
     if (token.type === 'null') {
       current++;
-      return { type: 'null', value: null };
+      return createJSONNullNode();
     }
 
     if (token.type === 'number') {
       current++;
-      return { type: 'number', value: +token.value };
+      return createJSONNumberNode(token.value);
     }
 
     if (token.type === 'string') {
       current++;
-      return { type: 'string', value: token.value };
+      return createJSONStringNode(token.value);
     }
 
     if (isParenToken(token) && token.value === '{') {
-      const objectNode: JSONObjectNode = {
-        type: 'object',
-        properties: {},
-      };
+      const objectNode = createEmptyJSONObjectNode();
       let nextToken = tokens[++current];
       while (
         nextToken &&
@@ -256,10 +315,7 @@ export function parser(tokens: JSONToken[]): JSONNode[] {
     }
 
     if (isSquareBracketToken(token) && token.value === '[') {
-      const arrayNode: JSONArrayNode = {
-        type: 'array',
-        items: [],
-      };
+      const arrayNode = createEmptyJSONArrayNode();
       let nextToken = tokens[++current];
       while (
         nextToken &&
