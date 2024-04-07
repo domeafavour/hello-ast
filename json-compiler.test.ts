@@ -1,4 +1,4 @@
-import { JSONToken, tokenizer } from './json-compiler';
+import { JSONNode, JSONToken, parser, tokenizer } from './json-compiler';
 
 describe('json-tokenizer', () => {
   it('should contain a null-literal token only', () => {
@@ -46,5 +46,37 @@ describe('json-tokenizer', () => {
       { type: 'string', value: 'Doe' },
       { type: 'paren', value: '}' },
     ] as JSONToken[]);
+  });
+});
+
+describe('json-parser', () => {
+  it('should contain a boolean(true) null node', () => {
+    expect(parser(tokenizer('true'))).toEqual([
+      { type: 'boolean', value: true },
+    ] as JSONNode[]);
+  });
+
+  it('should contain a boolean(false) null node', () => {
+    expect(parser(tokenizer('false'))).toEqual([
+      { type: 'boolean', value: false },
+    ] as JSONNode[]);
+  });
+
+  it('should contain a json null node', () => {
+    expect(parser(tokenizer('null'))).toEqual([
+      { type: 'null', value: null },
+    ] as JSONNode[]);
+  });
+
+  it('should contain a json number node', () => {
+    expect(parser(tokenizer('123'))).toEqual([
+      { type: 'number', value: 123 },
+    ] as JSONNode[]);
+  });
+
+  it('should contain a json string node', () => {
+    expect(parser(tokenizer('"123"'))).toEqual([
+      { type: 'string', value: '123' },
+    ] as JSONNode[]);
   });
 });

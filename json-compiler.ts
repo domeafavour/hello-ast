@@ -188,3 +188,58 @@ export function tokenizer(input: string): JSONToken[] {
 
   return tokens;
 }
+
+export type JSONNumberNode = { type: 'number'; value: number };
+export type JSONStringNode = { type: 'string'; value: string };
+export type JSONBooleanNode = { type: 'boolean'; value: boolean };
+export type JSONNullNode = { type: 'null'; value: null };
+export type JSONObjectNode = {
+  type: 'object';
+  properties: Record<string, JSONNode>;
+};
+export type JSONArrayNode = { type: 'array'; items: JSONNode[] };
+
+export type JSONNode =
+  | JSONNumberNode
+  | JSONStringNode
+  | JSONBooleanNode
+  | JSONNullNode
+  | JSONObjectNode
+  | JSONArrayNode;
+
+export function parser(tokens: JSONToken[]): JSONNode[] {
+  const nodes: JSONNode[] = [];
+  let current = 0;
+
+  function walk(): JSONNode {
+    let token = tokens[current];
+
+    if (token.type === 'boolean') {
+      current++;
+      return { type: 'boolean', value: token.value === 'true' };
+    }
+
+    if (token.type === 'null') {
+      current++;
+      return { type: 'null', value: null };
+    }
+
+    if (token.type === 'number') {
+      current++;
+      return { type: 'number', value: +token.value };
+    }
+
+    if (token.type === 'string') {
+      current++;
+      return { type: 'string', value: token.value };
+    }
+
+    throw new Error('Invalid token');
+  }
+
+  while (current < tokens.length) {
+    nodes.push(walk());
+  }
+
+  return nodes;
+}
