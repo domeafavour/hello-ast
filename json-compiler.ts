@@ -285,3 +285,36 @@ export function parser(tokens: JSONToken[]): JSONNode[] {
 
   return nodes;
 }
+
+export function transformer(
+  ast: JSONNode[]
+): string | number | boolean | object | Array<any> | null {
+  if (!ast.length) {
+    throw new Error('Invalid AST');
+  }
+  const [rootNode] = ast;
+  switch (rootNode.type) {
+    case 'null': {
+      return null;
+    }
+    case 'boolean': {
+      return rootNode.value;
+    }
+    case 'number': {
+      return rootNode.value;
+    }
+    case 'string': {
+      return rootNode.value;
+    }
+    case 'object': {
+      const obj: Record<string, any> = {};
+      for (const key in rootNode.properties) {
+        obj[key] = transformer([rootNode.properties[key]]);
+      }
+      return obj;
+    }
+    case 'array': {
+      return rootNode.items.map((item) => transformer([item]));
+    }
+  }
+}

@@ -1,4 +1,10 @@
-import { JSONNode, JSONToken, parser, tokenizer } from './json-compiler';
+import {
+  JSONNode,
+  JSONToken,
+  parser,
+  tokenizer,
+  transformer,
+} from './json-compiler';
 
 describe('json-tokenizer', () => {
   it('should contain a null-literal token only', () => {
@@ -137,5 +143,24 @@ describe('json-parser', () => {
         ],
       },
     ] as JSONNode[]);
+  });
+});
+
+describe('json-transformer', () => {
+  it('should transform a json object node to a string', () => {
+    expect(
+      transformer(
+        parser(tokenizer('{"name":"John","address":{"city":"New York"}}'))
+      )
+    ).toEqual({
+      name: 'John',
+      address: {
+        city: 'New York',
+      },
+    });
+  });
+
+  it('should transform a json array node to a string', () => {
+    expect(transformer(parser(tokenizer('[1,2,3]')))).toEqual([1, 2, 3]);
   });
 });
