@@ -8,7 +8,7 @@ type BooleanLiteralToken = { type: 'boolean'; value: 'true' | 'false' };
 type NullLiteralToken = { type: 'null'; value: 'null' };
 type PropertyToken = { type: 'property'; value: string };
 
-type JSONToken =
+export type JSONToken =
   | ParenToken
   | ColonToken
   | CommaToken
@@ -52,9 +52,19 @@ const TRUE_LITERAL = 'true';
 const FALSE_LITERAL = 'false';
 const NULL_LITERAL = 'null';
 
-function tokenizer(input: string): JSONToken[] {
+export function tokenizer(input: string): JSONToken[] {
   const tokens: JSONToken[] = [];
   let current = 0;
+
+  function pushStringToken() {
+    // string literal
+    let value = '';
+    while (input[++current] !== '"') {
+      value += input[current];
+    }
+    tokens.push({ type: 'string', value });
+    current++;
+  }
 
   while (current < input.length) {
     const char = input[current];
@@ -100,10 +110,14 @@ function tokenizer(input: string): JSONToken[] {
     // {"firstName":"John","lastName":"Doe"}
     if (char === '"') {
       const previous = tokens[tokens.length - 1];
+
+      if (!previous) {
+        pushStringToken();
+        continue;
+      }
       if (
-        previous &&
-        ((isParenToken(previous) && previous.value === '{') ||
-          isCommaToken(previous))
+        (isParenToken(previous) && previous.value === '{') ||
+        isCommaToken(previous)
       ) {
         // property
         let value = '';
@@ -118,12 +132,7 @@ function tokenizer(input: string): JSONToken[] {
         (isSquareBracketToken(previous) && previous.value === '[')
       ) {
         // string literal
-        let value = '';
-        while (input[++current] !== '"') {
-          value += input[current];
-        }
-        tokens.push({ type: 'string', value });
-        current++;
+        pushStringToken();
         continue;
       }
     }
@@ -140,7 +149,10 @@ function tokenizer(input: string): JSONToken[] {
     // `t`rue
     if (char === 't') {
       let value = char;
-      while (input[++current] === TRUE_LITERAL[value.length]) {
+      while (
+        current < input.length &&
+        input[++current] === TRUE_LITERAL[value.length]
+      ) {
         value += input[current];
       }
       tokens.push({ type: 'boolean', value: 'true' });
@@ -150,7 +162,10 @@ function tokenizer(input: string): JSONToken[] {
     // `f`alse
     if (char === 'f') {
       let value = char;
-      while (input[++current] === FALSE_LITERAL[value.length]) {
+      while (
+        current < input.length &&
+        input[++current] === FALSE_LITERAL[value.length]
+      ) {
         value += input[current];
       }
       tokens.push({ type: 'boolean', value: 'false' });
@@ -160,7 +175,10 @@ function tokenizer(input: string): JSONToken[] {
     // `n`ull
     if (char === 'n') {
       let value = char;
-      while (input[++current] === NULL_LITERAL[value.length]) {
+      while (
+        current < input.length &&
+        input[++current] === NULL_LITERAL[value.length]
+      ) {
         value += input[current];
       }
       tokens.push({ type: 'null', value: 'null' });
@@ -170,25 +188,3 @@ function tokenizer(input: string): JSONToken[] {
 
   return tokens;
 }
-
-const jsonTokens = tokenizer(
-  JSON.stringify({
-    id: 1,
-    firstName: 'John',
-    lastName: 'Doe',
-    married: true,
-    teenager: false,
-    age: 22,
-    nullValue: null,
-    hobbies: ['running', 'swimming'],
-    friends: [
-      {
-        firstName: 'Jane',
-        lastName: 'Doe',
-        bff: { firstName: 'Mary', lastName: 'Jane' },
-      },
-    ],
-  })
-);
-
-console.log(jsonTokens);
