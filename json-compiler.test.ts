@@ -47,6 +47,18 @@ describe('json-tokenizer', () => {
       { type: 'paren', value: '}' },
     ] as JSONToken[]);
   });
+
+  it('left square-bracket + number(1) + comma + number(2) + comma + number(3) + right square-bracket', () => {
+    expect(tokenizer('[1,2,3]')).toEqual([
+      { type: 'square-bracket', value: '[' },
+      { type: 'number', value: '1' },
+      { type: 'comma', value: ',' },
+      { type: 'number', value: '2' },
+      { type: 'comma', value: ',' },
+      { type: 'number', value: '3' },
+      { type: 'square-bracket', value: ']' },
+    ] as JSONToken[]);
+  });
 });
 
 describe('json-parser', () => {
@@ -91,6 +103,19 @@ describe('json-parser', () => {
           lastName: { type: 'string', value: 'Doe' },
           age: { type: 'number', value: 22 },
         },
+      },
+    ] as JSONNode[]);
+  });
+
+  it('should contain a json array node', () => {
+    expect(parser(tokenizer('[1,2,3]'))).toEqual([
+      {
+        type: 'array',
+        items: [
+          { type: 'number', value: 1 },
+          { type: 'number', value: 2 },
+          { type: 'number', value: 3 },
+        ],
       },
     ] as JSONNode[]);
   });

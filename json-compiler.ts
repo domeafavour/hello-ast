@@ -255,6 +255,22 @@ export function parser(tokens: JSONToken[]): JSONNode[] {
       return objectNode;
     }
 
+    if (isSquareBracketToken(token) && token.value === '[') {
+      const arrayNode: JSONArrayNode = {
+        type: 'array',
+        items: [],
+      };
+      let nextToken = tokens[++current];
+      while (
+        nextToken &&
+        !(isSquareBracketToken(nextToken) && nextToken.value === ']')
+      ) {
+        arrayNode.items.push(walk());
+        nextToken = tokens[++current];
+      }
+      return arrayNode;
+    }
+
     if (token.type === 'colon' || token.type === 'comma') {
       current++;
       return walk();
