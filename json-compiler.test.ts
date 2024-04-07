@@ -79,4 +79,19 @@ describe('json-parser', () => {
       { type: 'string', value: '123' },
     ] as JSONNode[]);
   });
+
+  it('should contain a json object node', () => {
+    expect(
+      parser(tokenizer('{"firstName":"John","lastName":"Doe","age":22}'))
+    ).toEqual([
+      {
+        type: 'object',
+        properties: {
+          firstName: { type: 'string', value: 'John' },
+          lastName: { type: 'string', value: 'Doe' },
+          age: { type: 'number', value: 22 },
+        },
+      },
+    ] as JSONNode[]);
+  });
 });

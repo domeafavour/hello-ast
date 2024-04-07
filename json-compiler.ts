@@ -234,7 +234,33 @@ export function parser(tokens: JSONToken[]): JSONNode[] {
       return { type: 'string', value: token.value };
     }
 
-    throw new Error('Invalid token');
+    if (isParenToken(token) && token.value === '{') {
+      const objectNode: JSONObjectNode = {
+        type: 'object',
+        properties: {},
+      };
+      let nextToken = tokens[++current];
+      while (
+        nextToken &&
+        !(isParenToken(nextToken) && nextToken.value === '}')
+      ) {
+        if (nextToken.type === 'property') {
+          const property = nextToken.value;
+          // skip colon
+          current++;
+          objectNode.properties[property] = walk();
+        }
+        nextToken = tokens[++current];
+      }
+      return objectNode;
+    }
+
+    if (token.type === 'colon' || token.type === 'comma') {
+      current++;
+      return walk();
+    }
+
+    throw new TypeError(`Invalid token: ${token.type}`);
   }
 
   while (current < tokens.length) {
