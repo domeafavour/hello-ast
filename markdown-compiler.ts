@@ -156,7 +156,23 @@ export type ParagraphElement = {
   children: TextElement[];
 };
 
-export type MarkdownElement = TextElement | ParagraphElement | HeadingElement;
+export type ListItemElement = {
+  type: 'list-item';
+  children: TextElement[];
+};
+
+export type OrderListItemElement = {
+  type: 'order-list-item';
+  order: number;
+  children: TextElement[];
+};
+
+export type MarkdownElement =
+  | TextElement
+  | ParagraphElement
+  | HeadingElement
+  | ListItemElement
+  | OrderListItemElement;
 
 function createHeadingElement(level: number): HeadingElement {
   return { type: 'heading', level, children: [] };
@@ -164,6 +180,10 @@ function createHeadingElement(level: number): HeadingElement {
 
 function createParagraphElement(): ParagraphElement {
   return { type: 'paragraph', children: [] };
+}
+
+function createListItemElement(): ListItemElement {
+  return { type: 'list-item', children: [] };
 }
 
 export function parser(tokens: Token[]): MarkdownElement[] {
@@ -222,6 +242,32 @@ export function parser(tokens: Token[]): MarkdownElement[] {
     if (token.type === 'spaces') {
       current++;
       return { type: 'text', value: ' '.repeat(token.count) };
+    }
+
+    if (token.type === 'dash') {
+      // const previous = tokens[current - 1];
+      const next = tokens[current + 1];
+
+      // `- item`
+      // bulleted list item
+      if (next && next.type === 'spaces') {
+        const itemElement = createListItemElement();
+
+        // Skip current dash and next spaces
+        // `- item` => `item`
+        current += 2;
+
+        // The start of first line or a new line.
+        while (tokens[current] && tokens[current].type !== 'line-break') {
+          // (text or spaces)
+          itemElement.children.push(walk() as TextElement);
+        }
+
+        return itemElement;
+      } else {
+        tokens[current] = { type: 'text', text: '-' } as TextToken;
+        return walk();
+      }
     }
 
     throw new TypeError(`Unknown token type: ${token.type}`);

@@ -405,4 +405,60 @@ describe('markdown parser', () => {
       },
     ] satisfies MarkdownElement[]);
   });
+
+  it('should return an element list with some list items', () => {
+    const tokens = tokenizer('- Hello World\n- Coding\n- Ha');
+    const elements = parser(tokens);
+    expect(elements).toEqual([
+      {
+        type: 'list-item',
+        children: [
+          {
+            type: 'text',
+            value: 'Hello',
+          },
+          {
+            type: 'text',
+            value: ' ',
+          },
+          {
+            type: 'text',
+            value: 'World',
+          },
+        ],
+      },
+      {
+        type: 'list-item',
+        children: [
+          {
+            type: 'text',
+            value: 'Coding',
+          },
+        ],
+      },
+      {
+        type: 'list-item',
+        children: [
+          {
+            type: 'text',
+            value: 'Ha',
+          },
+        ],
+      },
+    ] satisfies MarkdownElement[]);
+  });
+
+  it('should contain an paragraph element when there is no spaces between dash and text', () => {
+    const tokens = tokenizer('-Hello');
+    const elements = parser(tokens);
+    expect(elements).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', value: '-' },
+          { type: 'text', value: 'Hello' },
+        ],
+      },
+    ] satisfies MarkdownElement[]);
+  });
 });
