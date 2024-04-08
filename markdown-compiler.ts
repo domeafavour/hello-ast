@@ -162,6 +162,10 @@ function createHeadingElement(level: number): HeadingElement {
   return { type: 'heading', level, children: [] };
 }
 
+function createParagraphElement(): ParagraphElement {
+  return { type: 'paragraph', children: [] };
+}
+
 export function parser(tokens: Token[]): MarkdownElement[] {
   const elements: MarkdownElement[] = [];
   let current = 0;
@@ -199,10 +203,8 @@ export function parser(tokens: Token[]): MarkdownElement[] {
       current++;
       // The start of first line or a new line
       if (!previous || previous.type === 'line-break') {
-        const paragraphElement: ParagraphElement = {
-          type: 'paragraph',
-          children: [text],
-        };
+        const paragraphElement: ParagraphElement = createParagraphElement();
+        paragraphElement.children.push(text);
 
         while (tokens[current] && tokens[current].type !== 'line-break') {
           paragraphElement.children.push(walk() as TextElement);
