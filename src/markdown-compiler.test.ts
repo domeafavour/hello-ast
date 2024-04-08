@@ -5,6 +5,14 @@ describe('markdown compiler', () => {
     expect(tokenizer('')).toEqual([]);
   });
 
+  it('should contain back quote tokens', () => {
+    expect(tokenizer('`code`')).toEqual([
+      { type: 'back-quote', value: '`' },
+      { type: 'text', text: 'code' },
+      { type: 'back-quote', value: '`' },
+    ] satisfies Token[]);
+  });
+
   it('should return a text token list', () => {
     expect(tokenizer('hello world')).toEqual([
       {

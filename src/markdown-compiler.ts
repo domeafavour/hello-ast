@@ -1,4 +1,5 @@
 export type SharpsToken = { type: 'sharps'; count: number };
+export type BackQuoteToken = { type: 'back-quote'; value: '`' };
 export type DashToken = { type: 'dash' };
 
 /**
@@ -15,6 +16,7 @@ export type Token =
   | DashToken
   | OrderToken
   | SpacesToken
+  | BackQuoteToken
   | LineBreakToken
   | TextToken;
 
@@ -51,7 +53,7 @@ const LINE_BREAK = /\n/;
 const DASH = /-/;
 const NUMBER = /[0-9]/;
 
-const TEXT = /[^# \n]/;
+const TEXT = /[^# \n`]/;
 
 function createSharpsToken(count: number): SharpsToken {
   return { type: 'sharps', count };
@@ -75,6 +77,10 @@ function createDashToken(): DashToken {
 
 function createOrderToken(value: string): OrderToken {
   return { type: 'order', value: parseInt(value) };
+}
+
+function createBackQuoteToken(): BackQuoteToken {
+  return { type: 'back-quote', value: '`' };
 }
 
 export function tokenizer(input: string): Token[] {
@@ -113,6 +119,12 @@ export function tokenizer(input: string): Token[] {
 
     if (DASH.test(char)) {
       tokens.push(createDashToken());
+      current++;
+      continue;
+    }
+
+    if (char === '`') {
+      tokens.push(createBackQuoteToken());
       current++;
       continue;
     }
