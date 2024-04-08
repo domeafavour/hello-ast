@@ -330,4 +330,79 @@ describe('markdown parser', () => {
       },
     ] satisfies MarkdownElement[]);
   });
+
+  it('should return an paragraph element', () => {
+    const tokens = tokenizer('Hello World');
+    const elements = parser(tokens);
+
+    expect(elements).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            value: 'Hello',
+          },
+          {
+            type: 'text',
+            value: ' ',
+          },
+          {
+            type: 'text',
+            value: 'World',
+          },
+        ],
+      },
+    ] satisfies MarkdownElement[]);
+  });
+
+  it('should return an element list with one heading element and one paragraph element', () => {
+    const tokens = tokenizer('# Hello World\nI am ok.');
+    const elements = parser(tokens);
+    expect(elements).toEqual([
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            type: 'text',
+            value: 'Hello',
+          },
+          {
+            type: 'text',
+            value: ' ',
+          },
+          {
+            type: 'text',
+            value: 'World',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            value: 'I',
+          },
+          {
+            type: 'text',
+            value: ' ',
+          },
+          {
+            type: 'text',
+            value: 'am',
+          },
+          {
+            type: 'text',
+            value: ' ',
+          },
+          {
+            type: 'text',
+            value: 'ok.',
+          },
+        ],
+      },
+    ] satisfies MarkdownElement[]);
+  });
 });

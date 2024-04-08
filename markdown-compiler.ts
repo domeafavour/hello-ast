@@ -193,8 +193,28 @@ export function parser(tokens: Token[]): MarkdownElement[] {
     }
 
     if (token.type === 'text') {
+      const previous = tokens[current - 1];
+      const text: TextElement = { type: 'text', value: token.text };
+
       current++;
-      return { type: 'text', value: token.text };
+      // The start of first line or a new line
+      if (!previous || previous.type === 'line-break') {
+        const paragraphElement: ParagraphElement = {
+          type: 'paragraph',
+          children: [text],
+        };
+
+        while (tokens[current] && tokens[current].type !== 'line-break') {
+          paragraphElement.children.push(walk() as TextElement);
+        }
+        return paragraphElement;
+      }
+      return text;
+    }
+
+    if (token.type === 'line-break') {
+      current++;
+      return walk();
     }
 
     if (token.type === 'spaces') {
