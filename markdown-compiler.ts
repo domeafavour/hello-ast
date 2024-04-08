@@ -139,3 +139,75 @@ export function tokenizer(input: string): Token[] {
 
   return tokens;
 }
+
+export type TextElement = {
+  type: 'text';
+  value: string;
+};
+
+export type HeadingElement = {
+  type: 'heading';
+  level: number;
+  children: TextElement[];
+};
+
+export type ParagraphElement = {
+  type: 'paragraph';
+  children: TextElement[];
+};
+
+export type MarkdownElement = TextElement | ParagraphElement | HeadingElement;
+
+function createHeadingElement(level: number): HeadingElement {
+  return { type: 'heading', level, children: [] };
+}
+
+export function parser(tokens: Token[]): MarkdownElement[] {
+  const elements: MarkdownElement[] = [];
+  let current = 0;
+
+  function walk(): MarkdownElement {
+    const token = tokens[current];
+    if (token.type === 'sharps') {
+      let nextToken = tokens[current + 1];
+      // `# hello`
+      // heading 1 `hello`
+      if (nextToken && nextToken.type === 'spaces') {
+        const headingElement = createHeadingElement(token.count);
+
+        // Skip current sharps and next spaces
+        current += 2;
+
+        // text or spaces
+        while (tokens[current] && tokens[current].type !== 'line-break') {
+          headingElement.children.push(walk() as TextElement);
+        }
+
+        return headingElement;
+      } else {
+        current++;
+        // `#hello`
+        // text `#`
+        return { type: 'text', value: '#'.repeat(token.count) };
+      }
+    }
+
+    if (token.type === 'text') {
+      current++;
+      return { type: 'text', value: token.text };
+    }
+
+    if (token.type === 'spaces') {
+      current++;
+      return { type: 'text', value: ' '.repeat(token.count) };
+    }
+
+    throw new TypeError(`Unknown token type: ${token.type}`);
+  }
+
+  while (current < tokens.length) {
+    elements.push(walk());
+  }
+
+  return elements;
+}

@@ -1,4 +1,4 @@
-import { Token, tokenizer } from './markdown-compiler';
+import { MarkdownElement, Token, parser, tokenizer } from './markdown-compiler';
 
 describe('markdown compiler', () => {
   it('should return an empty token list', () => {
@@ -297,5 +297,37 @@ describe('markdown compiler', () => {
         text: 'hello',
       },
     ] satisfies Token[]);
+  });
+});
+
+describe('markdown parser', () => {
+  it('should return an empty element list', () => {
+    expect(parser(tokenizer(''))).toEqual([] satisfies MarkdownElement[]);
+  });
+
+  it('should return an element list with one heading element', () => {
+    const tokens = tokenizer('# Hello World');
+    const elements = parser(tokens);
+
+    expect(elements).toEqual([
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          {
+            type: 'text',
+            value: 'Hello',
+          },
+          {
+            type: 'text',
+            value: ' ',
+          },
+          {
+            type: 'text',
+            value: 'World',
+          },
+        ],
+      },
+    ] satisfies MarkdownElement[]);
   });
 });
