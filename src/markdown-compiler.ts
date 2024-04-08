@@ -152,10 +152,17 @@ export function tokenizer(input: string): Token[] {
   return tokens;
 }
 
-export type TextElement = {
+export type InlineTextElement = {
   type: 'text';
   value: string;
 };
+
+export type InlineCodeElement = {
+  type: 'inline-code';
+  value: string;
+};
+
+export type TextElement = InlineTextElement | InlineCodeElement;
 
 export type HeadingElement = {
   type: 'heading';
@@ -206,6 +213,38 @@ export function parser(tokens: Token[]): MarkdownElement[] {
   const elements: MarkdownElement[] = [];
   let current = 0;
 
+  function walkInlineElements(): TextElement[] {
+    const elements: TextElement[] = [];
+    while (tokens[current] && tokens[current].type !== 'line-break') {
+      const token = tokens[current];
+      if (token.type === 'text') {
+        elements.push({ type: 'text', value: token.text });
+      } else if (token.type === 'spaces') {
+        elements.push({ type: 'text', value: ' '.repeat(token.count) });
+      } else if (token.type === 'back-quote') {
+        // Skip back-quote
+        current++;
+
+        let text = '';
+        while (tokens[current] && tokens[current].type !== 'back-quote') {
+          // TODO: token text resolver
+          const textToken = tokens[current++] as TextToken;
+          text += textToken.text;
+        }
+
+        // Add this inline code element if the next token is back-quote
+        // `code` => yes
+        // `code  => no
+        if (tokens[current].type === 'back-quote') {
+          current++;
+          elements.push({ type: 'inline-code', value: text });
+        }
+      }
+      current++;
+    }
+    return elements;
+  }
+
   function walk(): MarkdownElement {
     const token = tokens[current];
     if (token.type === 'sharps') {
@@ -218,10 +257,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         // Skip current sharps and next spaces
         current += 2;
 
-        // text or spaces
-        while (tokens[current] && tokens[current].type !== 'line-break') {
-          headingElement.children.push(walk() as TextElement);
-        }
+        headingElement.children = walkInlineElements();
 
         return headingElement;
       } else {
@@ -241,10 +277,8 @@ export function parser(tokens: Token[]): MarkdownElement[] {
       if (!previous || previous.type === 'line-break') {
         const paragraphElement: ParagraphElement = createParagraphElement();
         paragraphElement.children.push(text);
+        paragraphElement.children.push(...walkInlineElements());
 
-        while (tokens[current] && tokens[current].type !== 'line-break') {
-          paragraphElement.children.push(walk() as TextElement);
-        }
         return paragraphElement;
       }
       return text;
@@ -273,11 +307,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         // `- item` => `item`
         current += 2;
 
-        // The start of first line or a new line.
-        while (tokens[current] && tokens[current].type !== 'line-break') {
-          // (text or spaces)
-          itemElement.children.push(walk() as TextElement);
-        }
+        itemElement.children = walkInlineElements();
 
         return itemElement;
       } else {
@@ -294,11 +324,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
 
         current += 2;
 
-        // The start of first line or a new line.
-        while (tokens[current] && tokens[current].type !== 'line-break') {
-          // (text or spaces)
-          orderElement.children.push(walk() as TextElement);
-        }
+        orderElement.children = walkInlineElements();
 
         return orderElement;
       } else {

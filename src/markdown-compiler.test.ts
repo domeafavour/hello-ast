@@ -339,6 +339,22 @@ describe('markdown parser', () => {
     ] satisfies MarkdownElement[]);
   });
 
+  it('should contain a paragraph element with text and inline code elements inside', () => {
+    const tokens = tokenizer('# Hello `World`');
+    const elements = parser(tokens);
+    expect(elements).toEqual([
+      {
+        type: 'heading',
+        level: 1,
+        children: [
+          { type: 'text', value: 'Hello' },
+          { type: 'text', value: ' ' },
+          { type: 'inline-code', value: 'World' },
+        ],
+      },
+    ] satisfies MarkdownElement[]);
+  });
+
   it('should return an paragraph element', () => {
     const tokens = tokenizer('Hello World');
     const elements = parser(tokens);
