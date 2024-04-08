@@ -5,6 +5,15 @@ describe('markdown compiler', () => {
     expect(tokenizer('')).toEqual([]);
   });
 
+  it('should return a text token list', () => {
+    expect(tokenizer('hello world')).toEqual([
+      {
+        type: 'text',
+        text: 'hello world',
+      },
+    ] as Token[]);
+  });
+
   it('sharps 1 + text Hello World', () => {
     expect(tokenizer('# Hello World')).toEqual([
       {
