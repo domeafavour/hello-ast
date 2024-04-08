@@ -1,11 +1,19 @@
 export type SharpsToken = { type: 'sharps'; count: number };
 export type DashToken = { type: 'dash' };
+
+/**
+ * 1. xxx
+ * 2. xxx
+ * 3. xxx
+ */
+export type OrderToken = { type: 'order'; value: number };
 export type SpacesToken = { type: 'spaces'; count: number };
 export type LineBreakToken = { type: 'line-break' };
 export type TextToken = { type: 'text'; text: string };
 export type Token =
   | SharpsToken
   | DashToken
+  | OrderToken
   | SpacesToken
   | LineBreakToken
   | TextToken;
@@ -41,6 +49,7 @@ const SHARP = /#/;
 const WHITESPACE = / /;
 const LINE_BREAK = /\n/;
 const DASH = /-/;
+const NUMBER = /[0-9]/;
 
 const TEXT = /[^# \n]/;
 
@@ -62,6 +71,10 @@ function createTextToken(text: string): TextToken {
 
 function createDashToken(): DashToken {
   return { type: 'dash' };
+}
+
+function createOrderToken(value: string): OrderToken {
+  return { type: 'order', value: parseInt(value) };
 }
 
 export function tokenizer(input: string): Token[] {
@@ -102,6 +115,15 @@ export function tokenizer(input: string): Token[] {
       tokens.push(createDashToken());
       current++;
       continue;
+    }
+
+    if (NUMBER.test(char)) {
+      if (input[current + 1] === '.') {
+        tokens.push(createOrderToken(char));
+        // Skip number and dot
+        current += 2;
+        continue;
+      }
     }
 
     if (TEXT.test(char)) {

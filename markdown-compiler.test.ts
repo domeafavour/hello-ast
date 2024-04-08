@@ -221,4 +221,81 @@ describe('markdown compiler', () => {
       },
     ] satisfies Token[]);
   });
+
+  it('with ordered list', () => {
+    expect(tokenizer('# Ordered List\n\n1. Hello World\n2. Coding')).toEqual([
+      {
+        type: 'sharps',
+        count: 1,
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'Ordered',
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'List',
+      },
+      {
+        type: 'line-break',
+      },
+      {
+        type: 'line-break',
+      },
+      {
+        type: 'order',
+        value: 1,
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'Hello',
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'World',
+      },
+      {
+        type: 'line-break',
+      },
+      {
+        type: 'order',
+        value: 2,
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'Coding',
+      },
+    ] satisfies Token[]);
+
+    expect(tokenizer('1.hello')).toEqual([
+      {
+        type: 'order',
+        value: 1,
+      },
+      {
+        type: 'text',
+        text: 'hello',
+      },
+    ] satisfies Token[]);
+  });
 });
