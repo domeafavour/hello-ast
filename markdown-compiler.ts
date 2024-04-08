@@ -1,8 +1,14 @@
 export type SharpsToken = { type: 'sharps'; count: number };
+export type DashToken = { type: 'dash' };
 export type SpacesToken = { type: 'spaces'; count: number };
 export type LineBreakToken = { type: 'line-break' };
 export type TextToken = { type: 'text'; text: string };
-export type Token = SharpsToken | SpacesToken | LineBreakToken | TextToken;
+export type Token =
+  | SharpsToken
+  | DashToken
+  | SpacesToken
+  | LineBreakToken
+  | TextToken;
 
 // # Hello World
 // { type: "sharps", count: 1 }
@@ -24,9 +30,17 @@ export type Token = SharpsToken | SpacesToken | LineBreakToken | TextToken;
 // { type: "spaces", count: 1 }
 // { type: "text", text: "ok." }
 
+// - Hello World
+// { type: "dash", count: 1 }
+// { type: "spaces", count: 1 }
+// { type: "text", text: "Hello" }
+// { type: "spaces", count: 1 }
+// { type: "text", text: "World" }
+
 const SHARP = /#/;
 const WHITESPACE = / /;
 const LINE_BREAK = /\n/;
+const DASH = /-/;
 
 const TEXT = /[^# \n]/;
 
@@ -44,6 +58,10 @@ function createLineBreakToken(): LineBreakToken {
 
 function createTextToken(text: string): TextToken {
   return { type: 'text', text };
+}
+
+function createDashToken(): DashToken {
+  return { type: 'dash' };
 }
 
 export function tokenizer(input: string): Token[] {
@@ -76,6 +94,12 @@ export function tokenizer(input: string): Token[] {
 
     if (LINE_BREAK.test(char)) {
       tokens.push(createLineBreakToken());
+      current++;
+      continue;
+    }
+
+    if (DASH.test(char)) {
+      tokens.push(createDashToken());
       current++;
       continue;
     }

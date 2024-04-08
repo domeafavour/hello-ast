@@ -157,4 +157,68 @@ describe('markdown compiler', () => {
       },
     ] satisfies Token[]);
   });
+
+  it('with bulleted list', () => {
+    expect(tokenizer('# Bulleted List\n\n- Hello World\n- Coding')).toEqual([
+      {
+        type: 'sharps',
+        count: 1,
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'Bulleted',
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'List',
+      },
+      {
+        type: 'line-break',
+      },
+      {
+        type: 'line-break',
+      },
+      {
+        type: 'dash',
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'Hello',
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'World',
+      },
+      {
+        type: 'line-break',
+      },
+      {
+        type: 'dash',
+      },
+      {
+        type: 'spaces',
+        count: 1,
+      },
+      {
+        type: 'text',
+        text: 'Coding',
+      },
+    ] satisfies Token[]);
+  });
 });
