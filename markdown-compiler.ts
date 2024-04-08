@@ -1,14 +1,50 @@
 export type SharpsToken = { type: 'sharps'; count: number };
+export type SpacesToken = { type: 'spaces'; count: number };
 export type LineBreakToken = { type: 'line-break' };
 export type TextToken = { type: 'text'; text: string };
-export type Token = SharpsToken | LineBreakToken | TextToken;
+export type Token = SharpsToken | SpacesToken | LineBreakToken | TextToken;
 
 // # Hello World
 // { type: "sharps", count: 1 }
-// { type: "text", count: "Hello World" }
+// { type: "spaces", count: 1 }
+// { type: "text", text: "Hello" }
+// { type: "spaces", count: 1 }
+// { type: "text", text: "World" }
+
+// # Hello World\nI am ok.
+// { type: "sharps", count: 1 }
+// { type: "spaces", count: 1 }
+// { type: "text", text: "Hello" }
+// { type: "spaces", count: 1 }
+// { type: "text", text: "World" }
+// { type: "line-break" }
+// { type: "text", text: "I" }
+// { type: "spaces", count: 1 }
+// { type: "text", text: "am" }
+// { type: "spaces", count: 1 }
+// { type: "text", text: "ok." }
 
 const SHARP = /#/;
-const WHITESPACE = /\s/;
+const WHITESPACE = / /;
+const LINE_BREAK = /\n/;
+
+const TEXT = /[^# \n]/;
+
+function createSharpsToken(count: number): SharpsToken {
+  return { type: 'sharps', count };
+}
+
+function createSpacesToken(count: number): SpacesToken {
+  return { type: 'spaces', count };
+}
+
+function createLineBreakToken(): LineBreakToken {
+  return { type: 'line-break' };
+}
+
+function createTextToken(text: string): TextToken {
+  return { type: 'text', text };
+}
 
 export function tokenizer(input: string): Token[] {
   const tokens: Token[] = [];
@@ -17,34 +53,42 @@ export function tokenizer(input: string): Token[] {
   while (current < input.length) {
     let char = input[current];
     if (SHARP.test(char)) {
-      let count = 0;
-      while (SHARP.test(char)) {
+      let count = 1;
+      while (SHARP.test(input[current + 1])) {
         count++;
         char = input[++current];
       }
-      tokens.push({ type: 'sharps', count });
+      tokens.push(createSharpsToken(count));
       current++;
       continue;
     }
 
-    // Skip whitespace after sharps
-    if (
-      WHITESPACE.test(char) &&
-      tokens.length &&
-      tokens[tokens.length - 1].type === 'sharps'
-    ) {
-      while (WHITESPACE.test(input[current])) {
-        current++;
+    if (WHITESPACE.test(char)) {
+      let count = 1;
+      while (WHITESPACE.test(input[current + 1])) {
+        count++;
+        char = input[++current];
       }
+      tokens.push(createSpacesToken(count));
+      current++;
       continue;
     }
 
-    let text = '';
-    while (current < input.length && !SHARP.test(input[current])) {
-      text += input[current];
+    if (LINE_BREAK.test(char)) {
+      tokens.push(createLineBreakToken());
       current++;
+      continue;
     }
-    tokens.push({ type: 'text', text });
+
+    if (TEXT.test(char)) {
+      let text = char;
+      while (current < input.length - 1 && TEXT.test(input[current + 1])) {
+        text += input[++current];
+      }
+      tokens.push(createTextToken(text));
+      current++;
+      continue;
+    }
   }
 
   return tokens;
