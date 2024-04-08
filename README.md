@@ -10,4 +10,6 @@ pnpm test
 
 ## TODO
 
-- [ ] markdown ast
+## Doing
+
+- markdown ast
