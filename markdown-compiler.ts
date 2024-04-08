@@ -186,6 +186,10 @@ function createListItemElement(): ListItemElement {
   return { type: 'list-item', children: [] };
 }
 
+function createOrderListItemElement(order: number): OrderListItemElement {
+  return { type: 'order-list-item', order, children: [] };
+}
+
 export function parser(tokens: Token[]): MarkdownElement[] {
   const elements: MarkdownElement[] = [];
   let current = 0;
@@ -265,12 +269,34 @@ export function parser(tokens: Token[]): MarkdownElement[] {
 
         return itemElement;
       } else {
-        tokens[current] = { type: 'text', text: '-' } as TextToken;
+        tokens[current] = createTextToken('-');
         return walk();
       }
     }
 
-    throw new TypeError(`Unknown token type: ${token.type}`);
+    if (token.type === 'order') {
+      const next = tokens[current + 1];
+
+      if (next && next.type === 'spaces') {
+        const orderElement = createOrderListItemElement(token.value);
+
+        current += 2;
+
+        // The start of first line or a new line.
+        while (tokens[current] && tokens[current].type !== 'line-break') {
+          // (text or spaces)
+          orderElement.children.push(walk() as TextElement);
+        }
+
+        return orderElement;
+      } else {
+        // reuse `text` logic
+        tokens[current] = createTextToken(token.value.toString() + '.');
+        return walk();
+      }
+    }
+
+    throw new TypeError(`Unknown token type`);
   }
 
   while (current < tokens.length) {

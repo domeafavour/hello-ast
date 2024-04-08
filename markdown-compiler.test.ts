@@ -461,4 +461,63 @@ describe('markdown parser', () => {
       },
     ] satisfies MarkdownElement[]);
   });
+
+  it('should return an element list with some order list items', () => {
+    const tokens = tokenizer('1. Hello World\n2. Coding\n3. Ha');
+    const elements = parser(tokens);
+    expect(elements).toEqual([
+      {
+        type: 'order-list-item',
+        order: 1,
+        children: [
+          {
+            type: 'text',
+            value: 'Hello',
+          },
+          {
+            type: 'text',
+            value: ' ',
+          },
+          {
+            type: 'text',
+            value: 'World',
+          },
+        ],
+      },
+      {
+        type: 'order-list-item',
+        order: 2,
+        children: [
+          {
+            type: 'text',
+            value: 'Coding',
+          },
+        ],
+      },
+      {
+        type: 'order-list-item',
+        order: 3,
+        children: [
+          {
+            type: 'text',
+            value: 'Ha',
+          },
+        ],
+      },
+    ] satisfies MarkdownElement[]);
+  });
+
+  it('should contain an paragraph element when there is no spaces between order and text', () => {
+    const tokens = tokenizer('1.Hello');
+    const elements = parser(tokens);
+    expect(elements).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', value: '1.' },
+          { type: 'text', value: 'Hello' },
+        ],
+      },
+    ] satisfies MarkdownElement[]);
+  });
 });
