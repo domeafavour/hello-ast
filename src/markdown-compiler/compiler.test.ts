@@ -1,5 +1,6 @@
 import {
   MarkdownElement,
+  ParagraphElement,
   Token,
   createBackQuoteToken,
   createBlockquoteElement,
@@ -16,8 +17,10 @@ import {
   createSharpsToken,
   createSpacesToken,
   createTextToken,
+  mergeInlineTexts,
   parser,
   tokenizer,
+  transformer,
 } from './compiler';
 
 describe('markdown compiler', () => {
@@ -329,6 +332,48 @@ describe('markdown parser', () => {
         createInlineTextElement('hello'),
         createInlineTextElement('>'),
         createInlineTextElement('world'),
+      ]),
+    ] satisfies MarkdownElement[]);
+  });
+});
+
+describe('markdown mergeInlineTexts', () => {
+  it('should merge all inline texts', () => {
+    const paragraph = parser(
+      tokenizer('Hello darkness my old friend')
+    )[0] as ParagraphElement;
+    // paragraph.children = mergeInlineTexts(paragraph.children);
+    expect([
+      { ...paragraph, children: mergeInlineTexts(paragraph.children) },
+    ]).toEqual([
+      createParagraphElement([
+        createInlineTextElement('Hello darkness my old friend'),
+      ]),
+    ]);
+  });
+
+  it('should merge series of inline text elements', () => {
+    const texts = [
+      createInlineTextElement('Hello'),
+      createInlineTextElement(' '),
+      createInlineTextElement('World'),
+      createInlineCodeElement('Ctrl+C'),
+      createInlineTextElement('!'),
+    ];
+    expect(mergeInlineTexts(texts)).toEqual([
+      createInlineTextElement('Hello World'),
+      createInlineCodeElement('Ctrl+C'),
+      createInlineTextElement('!'),
+    ] satisfies MarkdownElement[]);
+  });
+});
+
+describe('markdown transformer', () => {
+  it('should auto merge series of inline text elements', () => {
+    const ast = parser(tokenizer('Hello darkness my old friend'));
+    expect(transformer(ast)).toEqual([
+      createParagraphElement([
+        createInlineTextElement('Hello darkness my old friend'),
       ]),
     ] satisfies MarkdownElement[]);
   });

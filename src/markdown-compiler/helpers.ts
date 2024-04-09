@@ -15,6 +15,7 @@ import {
   RightArrowToken,
   SharpsToken,
   SpacesToken,
+  TextElement,
   TextToken,
 } from './typings';
 
@@ -111,4 +112,21 @@ export function createInlineCodeElement(text: string): InlineCodeElement {
   const baseText = createBaseTextElement(text) as InlineCodeElement;
   baseText.type = 'inline-code';
   return baseText;
+}
+
+export function mergeInlineTexts(texts: TextElement[]): TextElement[] {
+  return texts.reduce<TextElement[]>((merged, text) => {
+    const lastText = merged[merged.length - 1];
+    if (!lastText || lastText.type !== 'text') {
+      merged.push(text);
+    } else {
+      const inlineText = text as InlineTextElement;
+      if (inlineText.type === 'text') {
+        lastText.text += inlineText.text;
+      } else {
+        merged.push(text);
+      }
+    }
+    return merged;
+  }, []);
 }

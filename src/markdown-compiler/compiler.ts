@@ -20,10 +20,12 @@ import {
   createInlineTextElement,
   createLineBreakToken,
   createOrderToken,
+  createParagraphElement,
   createRightArrowToken,
   createSharpsToken,
   createSpacesToken,
   createTextToken,
+  mergeInlineTexts,
 } from './helpers';
 import {
   BlockquoteElement,
@@ -247,4 +249,17 @@ export function parser(tokens: Token[]): MarkdownElement[] {
   }
 
   return elements;
+}
+
+//  - [x] merge texts
+export function transformer(ast: MarkdownElement[]): MarkdownElement[] {
+  const newAst: MarkdownElement[] = [];
+  ast.forEach((element) => {
+    if (element.type === 'text' || element.type === 'inline-code') {
+      newAst.push(createParagraphElement([element]));
+    } else {
+      newAst.push({ ...element, children: mergeInlineTexts(element.children) });
+    }
+  });
+  return newAst;
 }
