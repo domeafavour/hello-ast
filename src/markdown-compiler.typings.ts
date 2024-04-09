@@ -1,6 +1,6 @@
-export type SharpsToken = { type: 'sharps'; count: number };
+export type SharpsToken = { type: 'sharps'; count: number; value: string };
 export type BackQuoteToken = { type: 'back-quote'; value: '`' };
-export type DashToken = { type: 'dash' };
+export type DashToken = { type: 'dash'; value: '-' };
 
 /**
  * 1. xxx
@@ -8,7 +8,7 @@ export type DashToken = { type: 'dash' };
  * 3. xxx
  */
 export type OrderToken = { type: 'order'; value: number };
-export type SpacesToken = { type: 'spaces'; count: number };
+export type SpacesToken = { type: 'spaces'; count: number; value: string };
 export type LineBreakToken = { type: 'line-break' };
 export type TextToken = { type: 'text'; text: string };
 export type Token =

@@ -56,31 +56,31 @@ const NUMBER = /[0-9]/;
 
 const TEXT = /[^# \n`]/;
 
-function createSharpsToken(count: number): SharpsToken {
-  return { type: 'sharps', count };
+export function createSharpsToken(count: number): SharpsToken {
+  return { type: 'sharps', count, value: '#'.repeat(count) };
 }
 
-function createSpacesToken(count: number): SpacesToken {
-  return { type: 'spaces', count };
+export function createSpacesToken(count: number): SpacesToken {
+  return { type: 'spaces', count, value: ' '.repeat(count) };
 }
 
-function createLineBreakToken(): LineBreakToken {
+export function createLineBreakToken(): LineBreakToken {
   return { type: 'line-break' };
 }
 
-function createTextToken(text: string): TextToken {
+export function createTextToken(text: string): TextToken {
   return { type: 'text', text };
 }
 
-function createDashToken(): DashToken {
-  return { type: 'dash' };
+export function createDashToken(): DashToken {
+  return { type: 'dash', value: '-' };
 }
 
-function createOrderToken(value: string): OrderToken {
+export function createOrderToken(value: string): OrderToken {
   return { type: 'order', value: parseInt(value) };
 }
 
-function createBackQuoteToken(): BackQuoteToken {
+export function createBackQuoteToken(): BackQuoteToken {
   return { type: 'back-quote', value: '`' };
 }
 
@@ -233,7 +233,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         current++;
         // `#hello`
         // text `#`
-        return { type: 'text', text: '#'.repeat(token.count) };
+        return { type: 'text', text: token.value };
       }
     }
 

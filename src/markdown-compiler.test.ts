@@ -1,4 +1,16 @@
-import { MarkdownElement, Token, parser, tokenizer } from './markdown-compiler';
+import {
+  MarkdownElement,
+  Token,
+  createBackQuoteToken,
+  createDashToken,
+  createLineBreakToken,
+  createOrderToken,
+  createSharpsToken,
+  createSpacesToken,
+  createTextToken,
+  parser,
+  tokenizer,
+} from './markdown-compiler';
 
 describe('markdown compiler', () => {
   it('should return an empty token list', () => {
@@ -7,303 +19,122 @@ describe('markdown compiler', () => {
 
   it('should contain back quote tokens', () => {
     expect(tokenizer('`code`')).toEqual([
-      { type: 'back-quote', value: '`' },
-      { type: 'text', text: 'code' },
-      { type: 'back-quote', value: '`' },
+      createBackQuoteToken(),
+      createTextToken('code'),
+      createBackQuoteToken(),
     ] satisfies Token[]);
   });
 
   it('should return a text token list', () => {
     expect(tokenizer('hello world')).toEqual([
-      {
-        type: 'text',
-        text: 'hello',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'world',
-      },
+      createTextToken('hello'),
+      createSpacesToken(1),
+      createTextToken('world'),
     ] satisfies Token[]);
   });
 
   it('should return a sharps token list', () => {
-    expect(tokenizer('###')).toEqual([
-      { type: 'sharps', count: 3 },
-    ] satisfies Token[]);
+    expect(tokenizer('###')).toEqual([createSharpsToken(3)] satisfies Token[]);
   });
 
   it('should return a line-break token list', () => {
     expect(tokenizer('\n\n')).toEqual([
-      { type: 'line-break' },
-      { type: 'line-break' },
+      createLineBreakToken(),
+      createLineBreakToken(),
     ] satisfies Token[]);
   });
 
   it('should return a spaces token list', () => {
-    expect(tokenizer('   ')).toEqual([
-      { type: 'spaces', count: 3 },
-    ] satisfies Token[]);
+    expect(tokenizer('   ')).toEqual([createSpacesToken(3)] satisfies Token[]);
   });
 
   it('should return a text token(prefix: `##`) list', () => {
     expect(tokenizer('##hello world')).toEqual([
-      {
-        type: 'sharps',
-        count: 2,
-      },
-      {
-        type: 'text',
-        text: 'hello',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'world',
-      },
+      createSharpsToken(2),
+      createTextToken('hello'),
+      createSpacesToken(1),
+      createTextToken('world'),
     ] satisfies Token[]);
   });
 
   it('sharps 1 + text Hello World', () => {
     expect(tokenizer('# Hello World')).toEqual([
-      {
-        type: 'sharps',
-        count: 1,
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'Hello',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'World',
-      },
+      createSharpsToken(1),
+      createSpacesToken(1),
+      createTextToken('Hello'),
+      createSpacesToken(1),
+      createTextToken('World'),
     ] satisfies Token[]);
 
     expect(tokenizer('#     Hello World')).toEqual([
-      {
-        type: 'sharps',
-        count: 1,
-      },
-      {
-        type: 'spaces',
-        count: 5,
-      },
-      {
-        type: 'text',
-        text: 'Hello',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'World',
-      },
+      createSharpsToken(1),
+      createSpacesToken(5),
+      createTextToken('Hello'),
+      createSpacesToken(1),
+      createTextToken('World'),
     ] satisfies Token[]);
   });
 
   it('heading one and a paragraph', () => {
     expect(tokenizer('# Hello World\nI am ok.')).toEqual([
-      {
-        type: 'sharps',
-        count: 1,
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'Hello',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'World',
-      },
-      {
-        type: 'line-break',
-      },
-      {
-        type: 'text',
-        text: 'I',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'am',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'ok.',
-      },
+      createSharpsToken(1),
+      createSpacesToken(1),
+      createTextToken('Hello'),
+      createSpacesToken(1),
+      createTextToken('World'),
+      createLineBreakToken(),
+      createTextToken('I'),
+      createSpacesToken(1),
+      createTextToken('am'),
+      createSpacesToken(1),
+      createTextToken('ok.'),
     ] satisfies Token[]);
   });
 
   it('with bulleted list', () => {
     expect(tokenizer('# Bulleted List\n\n- Hello World\n- Coding')).toEqual([
-      {
-        type: 'sharps',
-        count: 1,
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'Bulleted',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'List',
-      },
-      {
-        type: 'line-break',
-      },
-      {
-        type: 'line-break',
-      },
-      {
-        type: 'dash',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'Hello',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'World',
-      },
-      {
-        type: 'line-break',
-      },
-      {
-        type: 'dash',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'Coding',
-      },
+      createSharpsToken(1),
+      createSpacesToken(1),
+      createTextToken('Bulleted'),
+      createSpacesToken(1),
+      createTextToken('List'),
+      createLineBreakToken(),
+      createLineBreakToken(),
+      createDashToken(),
+      createSpacesToken(1),
+      createTextToken('Hello'),
+      createSpacesToken(1),
+      createTextToken('World'),
+      createLineBreakToken(),
+      createDashToken(),
+      createSpacesToken(1),
+      createTextToken('Coding'),
     ] satisfies Token[]);
   });
 
   it('with ordered list', () => {
     expect(tokenizer('# Ordered List\n\n1. Hello World\n2. Coding')).toEqual([
-      {
-        type: 'sharps',
-        count: 1,
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'Ordered',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'List',
-      },
-      {
-        type: 'line-break',
-      },
-      {
-        type: 'line-break',
-      },
-      {
-        type: 'order',
-        value: 1,
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'Hello',
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'World',
-      },
-      {
-        type: 'line-break',
-      },
-      {
-        type: 'order',
-        value: 2,
-      },
-      {
-        type: 'spaces',
-        count: 1,
-      },
-      {
-        type: 'text',
-        text: 'Coding',
-      },
+      createSharpsToken(1),
+      createSpacesToken(1),
+      createTextToken('Ordered'),
+      createSpacesToken(1),
+      createTextToken('List'),
+      createLineBreakToken(),
+      createLineBreakToken(),
+      createOrderToken('1'),
+      createSpacesToken(1),
+      createTextToken('Hello'),
+      createSpacesToken(1),
+      createTextToken('World'),
+      createLineBreakToken(),
+      createOrderToken('2'),
+      createSpacesToken(1),
+      createTextToken('Coding'),
     ] satisfies Token[]);
 
     expect(tokenizer('1.hello')).toEqual([
-      {
-        type: 'order',
-        value: 1,
-      },
-      {
-        type: 'text',
-        text: 'hello',
-      },
+      createOrderToken('1'),
+      createTextToken('hello'),
     ] satisfies Token[]);
   });
 });
