@@ -163,17 +163,14 @@ describe('markdown parser', () => {
     ] satisfies MarkdownElement[]);
   });
 
-  // it('a paragraph with one inline code text only', () => {
-  //   expect(parser(tokenizer('`Hello World`'))).toEqual([
-  //     {
-  //       type: 'paragraph',
-  //       children: [
-  //         //
-  //         { type: 'inline-code', text: 'Hello World' },
-  //       ],
-  //     },
-  //   ] satisfies MarkdownElement[]);
-  // });
+  it('a paragraph with one inline code text only', () => {
+    const tokens = tokenizer('`Hello World`\n`Hello Again`');
+    const elements = parser(tokens);
+    expect(elements).toEqual([
+      createParagraphElement([createInlineCodeElement('Hello World')]),
+      createParagraphElement([createInlineCodeElement('Hello Again')]),
+    ] satisfies MarkdownElement[]);
+  });
 
   it('should not contain a inline code text while there is only one back quote', () => {
     expect(parser(tokenizer('Hello `World'))).toEqual([

@@ -10,7 +10,7 @@ export type DashToken = { type: 'dash'; value: '-' };
 export type OrderToken = { type: 'order'; value: number };
 export type SpacesToken = { type: 'spaces'; count: number; value: string };
 export type LineBreakToken = { type: 'line-break' };
-export type TextToken = { type: 'text'; text: string };
+export type TextToken = { type: 'text'; value: string };
 export type Token =
   | SharpsToken
   | DashToken

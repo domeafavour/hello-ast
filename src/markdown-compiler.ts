@@ -68,8 +68,8 @@ export function createLineBreakToken(): LineBreakToken {
   return { type: 'line-break' };
 }
 
-export function createTextToken(text: string): TextToken {
-  return { type: 'text', text };
+export function createTextToken(value: string): TextToken {
+  return { type: 'text', value };
 }
 
 export function createDashToken(): DashToken {
@@ -153,6 +153,12 @@ export function tokenizer(input: string): Token[] {
   return tokens;
 }
 
+export function createBaseElement(
+  children: BaseElement['children'] = []
+): BaseElement {
+  return { children };
+}
+
 export function createHeadingElement(
   level: number,
   children: BaseElement['children'] = []
@@ -204,9 +210,13 @@ export function parser(tokens: Token[]): MarkdownElement[] {
     while (tokens[current] && tokens[current].type !== 'line-break') {
       const token = tokens[current];
       if (token.type === 'text') {
-        elements.push(createInlineTextElement(token.text));
+        elements.push(createInlineTextElement(token.value));
       } else if (token.type === 'spaces') {
-        elements.push({ type: 'text', text: ' '.repeat(token.count) });
+        elements.push(createInlineTextElement(token.value));
+      } else if (token.type === 'dash') {
+        elements.push(createInlineTextElement(token.value));
+      } else if (token.type === 'order') {
+        elements.push(createInlineTextElement(token.value.toString() + '.'));
       } else if (token.type === 'back-quote') {
         // Skip back-quote
         current++;
@@ -217,7 +227,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         while (tokens[current] && tokens[current].type !== 'back-quote') {
           // TODO: token text resolver
           const textToken = tokens[current++] as TextToken;
-          inlineText.text += textToken.text;
+          inlineText.text += textToken.value;
         }
 
         // Add this inline code element if the next token is back-quote
@@ -230,7 +240,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
           // Prepend the skipped back-quote
           inlineText.text = '`' + inlineText.text;
         }
-        current++;
+        // current++;
         elements.push(inlineText as TextElement);
       }
       current++;
@@ -240,77 +250,41 @@ export function parser(tokens: Token[]): MarkdownElement[] {
 
   function walkBlockElements(): MarkdownElement {
     const token = tokens[current];
-    if (token.type === 'sharps') {
-      let nextToken = tokens[current + 1];
-      // `# hello`
-      // heading 1 `hello`
-      if (nextToken && nextToken.type === 'spaces') {
-        // Skip current sharps and next spaces
-        current += 2;
-        return createHeadingElement(token.count, walkInlineElements());
-      } else {
-        current++;
-        // `#hello`
-        // text `#`
-        return createInlineTextElement(token.value);
+    if (token.type !== 'line-break') {
+      let blockElement = createBaseElement();
+      // default type is paragraph
+      (blockElement as ParagraphElement).type = 'paragraph';
+      if (token.type === 'sharps') {
+        let nextToken = tokens[current + 1];
+        // `# hello`
+        // heading 1 `hello`
+        if (nextToken && nextToken.type === 'spaces') {
+          // Skip current sharps and next spaces
+          current += 2;
+          (blockElement as HeadingElement).type = 'heading';
+          (blockElement as HeadingElement).level = token.count;
+        }
+      } else if (token.type === 'dash') {
+        let nextToken = tokens[current + 1];
+        if (nextToken && nextToken.type === 'spaces') {
+          // Skip current dash and next spaces
+          current += 2;
+          (blockElement as ListItemElement).type = 'list-item';
+        }
+      } else if (token.type === 'order') {
+        let nextToken = tokens[current + 1];
+        if (nextToken && nextToken.type === 'spaces') {
+          current += 2;
+          (blockElement as OrderListItemElement).type = 'order-list-item';
+          (blockElement as OrderListItemElement).order = token.value;
+        }
       }
-    }
-
-    if (token.type === 'text') {
-      const previous = tokens[current - 1];
-      const text: TextElement = createInlineTextElement(token.text);
-
+      blockElement.children = walkInlineElements();
       current++;
-      // The start of first line or a new line
-      if (!previous || previous.type === 'line-break') {
-        return createParagraphElement([text, ...walkInlineElements()]);
-      }
-      return text;
+      return blockElement as ParagraphElement;
     }
-
-    if (token.type === 'line-break') {
-      current++;
-      return walkBlockElements();
-    }
-
-    if (token.type === 'spaces') {
-      current++;
-      return createInlineTextElement(token.value);
-    }
-
-    if (token.type === 'dash') {
-      // const previous = tokens[current - 1];
-      const next = tokens[current + 1];
-
-      // `- item`
-      // bulleted list item
-      if (next && next.type === 'spaces') {
-        // Skip current dash and next spaces
-        // `- item` => `item`
-        current += 2;
-
-        return createListItemElement(walkInlineElements());
-      } else {
-        tokens[current] = createTextToken('-');
-        return walkBlockElements();
-      }
-    }
-
-    if (token.type === 'order') {
-      const next = tokens[current + 1];
-
-      if (next && next.type === 'spaces') {
-        current += 2;
-
-        return createOrderListItemElement(token.value, walkInlineElements());
-      } else {
-        // reuse `text` logic
-        tokens[current] = createTextToken(token.value.toString() + '.');
-        return walkBlockElements();
-      }
-    }
-
-    throw new TypeError(`Unknown token type`);
+    current++;
+    return walkBlockElements();
   }
 
   while (current < tokens.length) {
