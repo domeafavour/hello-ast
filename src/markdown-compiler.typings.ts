@@ -34,27 +34,27 @@ export interface InlineCodeElement extends BaseTextElement {
 
 export type TextElement = InlineTextElement | InlineCodeElement;
 
-export type HeadingElement = {
+export interface BaseElement {
+  children: TextElement[];
+}
+
+export interface HeadingElement extends BaseElement {
   type: 'heading';
   level: number;
-  children: TextElement[];
-};
+}
 
-export type ParagraphElement = {
+export interface ParagraphElement extends BaseElement {
   type: 'paragraph';
-  children: TextElement[];
-};
+}
 
-export type ListItemElement = {
+export interface ListItemElement extends BaseElement {
   type: 'list-item';
-  children: TextElement[];
-};
+}
 
-export type OrderListItemElement = {
+export interface OrderListItemElement extends BaseElement {
   type: 'order-list-item';
   order: number;
-  children: TextElement[];
-};
+}
 
 export type MarkdownElement =
   | TextElement

@@ -201,7 +201,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
     return elements;
   }
 
-  function walk(): MarkdownElement {
+  function walkBlockElements(): MarkdownElement {
     const token = tokens[current];
     if (token.type === 'sharps') {
       let nextToken = tokens[current + 1];
@@ -242,7 +242,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
 
     if (token.type === 'line-break') {
       current++;
-      return walk();
+      return walkBlockElements();
     }
 
     if (token.type === 'spaces') {
@@ -268,7 +268,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         return itemElement;
       } else {
         tokens[current] = createTextToken('-');
-        return walk();
+        return walkBlockElements();
       }
     }
 
@@ -286,7 +286,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
       } else {
         // reuse `text` logic
         tokens[current] = createTextToken(token.value.toString() + '.');
-        return walk();
+        return walkBlockElements();
       }
     }
 
@@ -294,7 +294,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
   }
 
   while (current < tokens.length) {
-    elements.push(walk());
+    elements.push(walkBlockElements());
   }
 
   return elements;
