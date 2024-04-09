@@ -3,8 +3,14 @@ import {
   Token,
   createBackQuoteToken,
   createDashToken,
+  createHeadingElement,
+  createInlineCodeElement,
+  createInlineTextElement,
   createLineBreakToken,
+  createListItemElement,
+  createOrderListItemElement,
   createOrderToken,
+  createParagraphElement,
   createSharpsToken,
   createSpacesToken,
   createTextToken,
@@ -149,24 +155,11 @@ describe('markdown parser', () => {
     const elements = parser(tokens);
 
     expect(elements).toEqual([
-      {
-        type: 'heading',
-        level: 1,
-        children: [
-          {
-            type: 'text',
-            text: 'Hello',
-          },
-          {
-            type: 'text',
-            text: ' ',
-          },
-          {
-            type: 'text',
-            text: 'World',
-          },
-        ],
-      },
+      createHeadingElement(1, [
+        createInlineTextElement('Hello'),
+        createInlineTextElement(' '),
+        createInlineTextElement('World'),
+      ]),
     ] satisfies MarkdownElement[]);
   });
 
@@ -184,14 +177,11 @@ describe('markdown parser', () => {
 
   it('should not contain a inline code text while there is only one back quote', () => {
     expect(parser(tokenizer('Hello `World'))).toEqual([
-      {
-        type: 'paragraph',
-        children: [
-          { type: 'text', text: 'Hello' },
-          { type: 'text', text: ' ' },
-          { type: 'text', text: '`World' },
-        ],
-      },
+      createParagraphElement([
+        createInlineTextElement('Hello'),
+        createInlineTextElement(' '),
+        createInlineTextElement('`World'),
+      ]),
     ] satisfies MarkdownElement[]);
   });
 
@@ -199,15 +189,11 @@ describe('markdown parser', () => {
     const tokens = tokenizer('# Hello `World`');
     const elements = parser(tokens);
     expect(elements).toEqual([
-      {
-        type: 'heading',
-        level: 1,
-        children: [
-          { type: 'text', text: 'Hello' },
-          { type: 'text', text: ' ' },
-          { type: 'inline-code', text: 'World' },
-        ],
-      },
+      createHeadingElement(1, [
+        createInlineTextElement('Hello'),
+        createInlineTextElement(' '),
+        createInlineCodeElement('World'),
+      ]),
     ] satisfies MarkdownElement[]);
   });
 
@@ -216,23 +202,11 @@ describe('markdown parser', () => {
     const elements = parser(tokens);
 
     expect(elements).toEqual([
-      {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: 'Hello',
-          },
-          {
-            type: 'text',
-            text: ' ',
-          },
-          {
-            type: 'text',
-            text: 'World',
-          },
-        ],
-      },
+      createParagraphElement([
+        createInlineTextElement('Hello'),
+        createInlineTextElement(' '),
+        createInlineTextElement('World'),
+      ]),
     ] satisfies MarkdownElement[]);
   });
 
@@ -240,49 +214,18 @@ describe('markdown parser', () => {
     const tokens = tokenizer('# Hello World\nI am ok.');
     const elements = parser(tokens);
     expect(elements).toEqual([
-      {
-        type: 'heading',
-        level: 1,
-        children: [
-          {
-            type: 'text',
-            text: 'Hello',
-          },
-          {
-            type: 'text',
-            text: ' ',
-          },
-          {
-            type: 'text',
-            text: 'World',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        children: [
-          {
-            type: 'text',
-            text: 'I',
-          },
-          {
-            type: 'text',
-            text: ' ',
-          },
-          {
-            type: 'text',
-            text: 'am',
-          },
-          {
-            type: 'text',
-            text: ' ',
-          },
-          {
-            type: 'text',
-            text: 'ok.',
-          },
-        ],
-      },
+      createHeadingElement(1, [
+        createInlineTextElement('Hello'),
+        createInlineTextElement(' '),
+        createInlineTextElement('World'),
+      ]),
+      createParagraphElement([
+        createInlineTextElement('I'),
+        createInlineTextElement(' '),
+        createInlineTextElement('am'),
+        createInlineTextElement(' '),
+        createInlineTextElement('ok.'),
+      ]),
     ] satisfies MarkdownElement[]);
   });
 
@@ -290,41 +233,13 @@ describe('markdown parser', () => {
     const tokens = tokenizer('- Hello World\n- Coding\n- Ha');
     const elements = parser(tokens);
     expect(elements).toEqual([
-      {
-        type: 'list-item',
-        children: [
-          {
-            type: 'text',
-            text: 'Hello',
-          },
-          {
-            type: 'text',
-            text: ' ',
-          },
-          {
-            type: 'text',
-            text: 'World',
-          },
-        ],
-      },
-      {
-        type: 'list-item',
-        children: [
-          {
-            type: 'text',
-            text: 'Coding',
-          },
-        ],
-      },
-      {
-        type: 'list-item',
-        children: [
-          {
-            type: 'text',
-            text: 'Ha',
-          },
-        ],
-      },
+      createListItemElement([
+        createInlineTextElement('Hello'),
+        createInlineTextElement(' '),
+        createInlineTextElement('World'),
+      ]),
+      createListItemElement([createInlineTextElement('Coding')]),
+      createListItemElement([createInlineTextElement('Ha')]),
     ] satisfies MarkdownElement[]);
   });
 
@@ -332,13 +247,10 @@ describe('markdown parser', () => {
     const tokens = tokenizer('-Hello');
     const elements = parser(tokens);
     expect(elements).toEqual([
-      {
-        type: 'paragraph',
-        children: [
-          { type: 'text', text: '-' },
-          { type: 'text', text: 'Hello' },
-        ],
-      },
+      createParagraphElement([
+        createInlineTextElement('-'),
+        createInlineTextElement('Hello'),
+      ]),
     ] satisfies MarkdownElement[]);
   });
 
@@ -346,44 +258,13 @@ describe('markdown parser', () => {
     const tokens = tokenizer('1. Hello World\n2. Coding\n3. Ha');
     const elements = parser(tokens);
     expect(elements).toEqual([
-      {
-        type: 'order-list-item',
-        order: 1,
-        children: [
-          {
-            type: 'text',
-            text: 'Hello',
-          },
-          {
-            type: 'text',
-            text: ' ',
-          },
-          {
-            type: 'text',
-            text: 'World',
-          },
-        ],
-      },
-      {
-        type: 'order-list-item',
-        order: 2,
-        children: [
-          {
-            type: 'text',
-            text: 'Coding',
-          },
-        ],
-      },
-      {
-        type: 'order-list-item',
-        order: 3,
-        children: [
-          {
-            type: 'text',
-            text: 'Ha',
-          },
-        ],
-      },
+      createOrderListItemElement(1, [
+        createInlineTextElement('Hello'),
+        createInlineTextElement(' '),
+        createInlineTextElement('World'),
+      ]),
+      createOrderListItemElement(2, [createInlineTextElement('Coding')]),
+      createOrderListItemElement(3, [createInlineTextElement('Ha')]),
     ] satisfies MarkdownElement[]);
   });
 
@@ -391,13 +272,10 @@ describe('markdown parser', () => {
     const tokens = tokenizer('1.Hello');
     const elements = parser(tokens);
     expect(elements).toEqual([
-      {
-        type: 'paragraph',
-        children: [
-          { type: 'text', text: '1.' },
-          { type: 'text', text: 'Hello' },
-        ],
-      },
+      createParagraphElement([
+        createInlineTextElement('1.'),
+        createInlineTextElement('Hello'),
+      ]),
     ] satisfies MarkdownElement[]);
   });
 });

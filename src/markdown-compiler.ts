@@ -179,6 +179,22 @@ export function createOrderListItemElement(
   return { type: 'order-list-item', order, children };
 }
 
+export function createBaseTextElement(text: string): BaseTextElement {
+  return { text };
+}
+
+export function createInlineTextElement(text: string): InlineTextElement {
+  const baseText = createBaseTextElement(text) as InlineTextElement;
+  baseText.type = 'text';
+  return baseText;
+}
+
+export function createInlineCodeElement(text: string): InlineCodeElement {
+  const baseText = createBaseTextElement(text) as InlineCodeElement;
+  baseText.type = 'inline-code';
+  return baseText;
+}
+
 export function parser(tokens: Token[]): MarkdownElement[] {
   const elements: MarkdownElement[] = [];
   let current = 0;
@@ -188,16 +204,14 @@ export function parser(tokens: Token[]): MarkdownElement[] {
     while (tokens[current] && tokens[current].type !== 'line-break') {
       const token = tokens[current];
       if (token.type === 'text') {
-        elements.push({ type: 'text', text: token.text });
+        elements.push(createInlineTextElement(token.text));
       } else if (token.type === 'spaces') {
         elements.push({ type: 'text', text: ' '.repeat(token.count) });
       } else if (token.type === 'back-quote') {
         // Skip back-quote
         current++;
 
-        const inlineText: BaseTextElement = {
-          text: '',
-        };
+        const inlineText = createBaseTextElement('');
 
         // Collect text until next back-quote or line-break
         while (tokens[current] && tokens[current].type !== 'back-quote') {
@@ -238,13 +252,13 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         current++;
         // `#hello`
         // text `#`
-        return { type: 'text', text: token.value };
+        return createInlineTextElement(token.value);
       }
     }
 
     if (token.type === 'text') {
       const previous = tokens[current - 1];
-      const text: TextElement = { type: 'text', text: token.text };
+      const text: TextElement = createInlineTextElement(token.text);
 
       current++;
       // The start of first line or a new line
@@ -261,7 +275,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
 
     if (token.type === 'spaces') {
       current++;
-      return { type: 'text', text: ' '.repeat(token.count) };
+      return createInlineTextElement(token.value);
     }
 
     if (token.type === 'dash') {
