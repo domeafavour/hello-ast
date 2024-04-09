@@ -6,28 +6,40 @@
 // { type: "text", text: "World" }
 
 import {
-  BackQuoteToken,
-  BaseElement,
-  BaseTextElement,
-  DashToken,
+  DASH,
+  LINE_BREAK,
+  NUMBER,
+  RIGHT_ARROW,
+  SHARP,
+  TEXT,
+  WHITESPACE,
+  createBackQuoteToken,
+  createBaseElement,
+  createBaseTextElement,
+  createDashToken,
+  createInlineTextElement,
+  createLineBreakToken,
+  createOrderToken,
+  createRightArrowToken,
+  createSharpsToken,
+  createSpacesToken,
+  createTextToken,
+} from './helpers';
+import {
+  BlockquoteElement,
   HeadingElement,
   InlineCodeElement,
   InlineTextElement,
-  LineBreakToken,
   ListItemElement,
   MarkdownElement,
   OrderListItemElement,
-  OrderToken,
   ParagraphElement,
-  BlockquoteElement,
-  RightArrowToken,
-  SharpsToken,
-  SpacesToken,
   TextElement,
   TextToken,
   Token,
 } from './typings';
 
+export * from './helpers';
 export * from './typings';
 
 // # Hello World\nI am ok.
@@ -49,47 +61,6 @@ export * from './typings';
 // { type: "text", text: "Hello" }
 // { type: "spaces", count: 1 }
 // { type: "text", text: "World" }
-
-const SHARP = /#/;
-const WHITESPACE = / /;
-const LINE_BREAK = /\n/;
-const DASH = /-/;
-const NUMBER = /[0-9]/;
-const RIGHT_ARROW = />/;
-
-const TEXT = /[^# \n>`]/;
-
-export function createSharpsToken(count: number): SharpsToken {
-  return { type: 'sharps', count, value: '#'.repeat(count) };
-}
-
-export function createSpacesToken(count: number): SpacesToken {
-  return { type: 'spaces', count, value: ' '.repeat(count) };
-}
-
-export function createLineBreakToken(): LineBreakToken {
-  return { type: 'line-break' };
-}
-
-export function createTextToken(value: string): TextToken {
-  return { type: 'text', value };
-}
-
-export function createDashToken(): DashToken {
-  return { type: 'dash', value: '-' };
-}
-
-export function createOrderToken(value: string): OrderToken {
-  return { type: 'order', value: parseInt(value) };
-}
-
-export function createBackQuoteToken(): BackQuoteToken {
-  return { type: 'back-quote', value: '`' };
-}
-
-export function createRightArrowToken(): RightArrowToken {
-  return { type: 'right-arrow', value: '>' };
-}
 
 export function tokenizer(input: string): Token[] {
   const tokens: Token[] = [];
@@ -164,60 +135,6 @@ export function tokenizer(input: string): Token[] {
   }
 
   return tokens;
-}
-
-export function createBaseElement(
-  children: BaseElement['children'] = []
-): BaseElement {
-  return { children };
-}
-
-export function createHeadingElement(
-  level: number,
-  children: BaseElement['children'] = []
-): HeadingElement {
-  return { type: 'heading', level, children };
-}
-
-export function createParagraphElement(
-  children: BaseElement['children'] = []
-): ParagraphElement {
-  return { type: 'paragraph', children };
-}
-
-export function createListItemElement(
-  children: BaseElement['children'] = []
-): ListItemElement {
-  return { type: 'list-item', children };
-}
-
-export function createOrderListItemElement(
-  order: number,
-  children: BaseElement['children'] = []
-): OrderListItemElement {
-  return { type: 'order-list-item', order, children };
-}
-
-export function createBlockquoteElement(
-  children: BaseElement['children'] = []
-): BlockquoteElement {
-  return { type: 'blockquote', children };
-}
-
-export function createBaseTextElement(text: string): BaseTextElement {
-  return { text };
-}
-
-export function createInlineTextElement(text: string): InlineTextElement {
-  const baseText = createBaseTextElement(text) as InlineTextElement;
-  baseText.type = 'text';
-  return baseText;
-}
-
-export function createInlineCodeElement(text: string): InlineCodeElement {
-  const baseText = createBaseTextElement(text) as InlineCodeElement;
-  baseText.type = 'inline-code';
-  return baseText;
 }
 
 export function parser(tokens: Token[]): MarkdownElement[] {
