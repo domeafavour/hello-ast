@@ -13,9 +13,11 @@ import {
   createOrderListItemElement,
   createOrderToken,
   createParagraphElement,
+  createParenContentToken,
   createRightArrowToken,
   createSharpsToken,
   createSpacesToken,
+  createSquareParenContentToken,
   createTextToken,
   mergeInlineTexts,
   parser,
@@ -177,6 +179,77 @@ describe('markdown compiler', () => {
       createSpacesToken(1),
       createTextToken('Hello'),
     ] satisfies Token[]);
+  });
+
+  it('should contain a paren content', () => {
+    expect(tokenizer('(hhy)')).toEqual([createParenContentToken('hhy')]);
+  });
+
+  it('should contain a left paren and a paren content', () => {
+    expect(tokenizer('((hh)')).toEqual([
+      createTextToken('('),
+      createParenContentToken('hh'),
+    ]);
+  });
+
+  it('should contain a paren content and a right paren', () => {
+    expect(tokenizer('(hhu))')).toEqual([
+      createParenContentToken('hhu'),
+      createTextToken(')'),
+    ]);
+  });
+
+  it('should not contain a paren content', () => {
+    expect(tokenizer('(hh')).toEqual([
+      createTextToken('('),
+      createTextToken('hh'),
+    ]);
+    expect(tokenizer('hh)')).toEqual([
+      createTextToken('hh'),
+      createTextToken(')'),
+    ]);
+  });
+
+  it('should contain a square paren content', () => {
+    expect(tokenizer('[hhhh]')).toEqual([
+      createSquareParenContentToken('hhhh'),
+    ]);
+  });
+  it('should contain a left square paren and a square paren content', () => {
+    expect(tokenizer('[[hhhh]')).toEqual([
+      createTextToken('['),
+      createSquareParenContentToken('hhhh'),
+    ]);
+  });
+  it('should contain a square paren content and a right square paren', () => {
+    expect(tokenizer('[hhhh]]')).toEqual([
+      createSquareParenContentToken('hhhh'),
+      createTextToken(']'),
+    ]);
+  });
+
+  it('should not contain a square paren content', () => {
+    expect(tokenizer('[hh')).toEqual([
+      createTextToken('['),
+      createTextToken('hh'),
+    ]);
+    expect(tokenizer('hh]')).toEqual([
+      createTextToken('hh'),
+      createTextToken(']'),
+    ]);
+  });
+
+  it('should contain a square paren content and a paren content', () => {
+    expect(tokenizer('This is a [link](https://www.google.com)')).toEqual([
+      createTextToken('This'),
+      createSpacesToken(1),
+      createTextToken('is'),
+      createSpacesToken(1),
+      createTextToken('a'),
+      createSpacesToken(1),
+      createSquareParenContentToken('link'),
+      createParenContentToken('https://www.google.com'),
+    ]);
   });
 });
 

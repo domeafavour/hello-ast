@@ -12,9 +12,11 @@ import {
   OrderListItemElement,
   OrderToken,
   ParagraphElement,
+  ParenContentToken,
   RightArrowToken,
   SharpsToken,
   SpacesToken,
+  SquareParenContentToken,
   TextElement,
   TextToken,
 } from './typings';
@@ -26,7 +28,12 @@ export const DASH = /-/;
 export const NUMBER = /[0-9]/;
 export const RIGHT_ARROW = />/;
 
-export const TEXT = /[^# \n>`]/;
+export const TEXT = /[^# \n>\(\)\[\]`]/;
+
+export const LEFT_PARENTHESES = /\(/;
+export const RIGHT_PARENTHESES = /\)/;
+export const LEFT_SQUARE_PARENTHESES = /\[/;
+export const RIGHT_SQUARE_PARENTHESES = /\]/;
 
 export function createSharpsToken(count: number): SharpsToken {
   return { type: 'sharps', count, value: '#'.repeat(count) };
@@ -58,6 +65,16 @@ export function createBackQuoteToken(): BackQuoteToken {
 
 export function createRightArrowToken(): RightArrowToken {
   return { type: 'right-arrow', value: '>' };
+}
+
+export function createSquareParenContentToken(
+  value: string
+): SquareParenContentToken {
+  return { type: 'square-paren-content', value };
+}
+
+export function createParenContentToken(value: string): ParenContentToken {
+  return { type: 'paren-content', value };
 }
 
 export function createBaseElement(

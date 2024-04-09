@@ -5,6 +5,13 @@ export type DashToken = { type: 'dash'; value: '-' };
 /**  for `blockquote` tag */
 export type RightArrowToken = { type: 'right-arrow'; value: '>' };
 
+/** [title](url) */
+export type SquareParenContentToken = {
+  type: 'square-paren-content';
+  value: string;
+};
+export type ParenContentToken = { type: 'paren-content'; value: string };
+
 /**
  * 1. xxx
  * 2. xxx
@@ -18,6 +25,8 @@ export type Token =
   | SharpsToken
   | DashToken
   | RightArrowToken
+  | SquareParenContentToken
+  | ParenContentToken
   | OrderToken
   | SpacesToken
   | BackQuoteToken

@@ -1,15 +1,12 @@
-// # Hello World
-// { type: "sharps", count: 1 }
-// { type: "spaces", count: 1 }
-// { type: "text", text: "Hello" }
-// { type: "spaces", count: 1 }
-// { type: "text", text: "World" }
-
 import {
   DASH,
+  LEFT_PARENTHESES,
+  LEFT_SQUARE_PARENTHESES,
   LINE_BREAK,
   NUMBER,
   RIGHT_ARROW,
+  RIGHT_PARENTHESES,
+  RIGHT_SQUARE_PARENTHESES,
   SHARP,
   TEXT,
   WHITESPACE,
@@ -21,9 +18,11 @@ import {
   createLineBreakToken,
   createOrderToken,
   createParagraphElement,
+  createParenContentToken,
   createRightArrowToken,
   createSharpsToken,
   createSpacesToken,
+  createSquareParenContentToken,
   createTextToken,
   mergeInlineTexts,
 } from './helpers';
@@ -43,26 +42,6 @@ import {
 
 export * from './helpers';
 export * from './typings';
-
-// # Hello World\nI am ok.
-// { type: "sharps", count: 1 }
-// { type: "spaces", count: 1 }
-// { type: "text", text: "Hello" }
-// { type: "spaces", count: 1 }
-// { type: "text", text: "World" }
-// { type: "line-break" }
-// { type: "text", text: "I" }
-// { type: "spaces", count: 1 }
-// { type: "text", text: "am" }
-// { type: "spaces", count: 1 }
-// { type: "text", text: "ok." }
-
-// - Hello World
-// { type: "dash", count: 1 }
-// { type: "spaces", count: 1 }
-// { type: "text", text: "Hello" }
-// { type: "spaces", count: 1 }
-// { type: "text", text: "World" }
 
 export function tokenizer(input: string): Token[] {
   const tokens: Token[] = [];
@@ -88,6 +67,74 @@ export function tokenizer(input: string): Token[] {
         char = input[++current];
       }
       tokens.push(createSpacesToken(count));
+      current++;
+      continue;
+    }
+
+    // paren content
+    if (LEFT_PARENTHESES.test(char)) {
+      // series of left paren: ((dd)
+      if (LEFT_PARENTHESES.test(input[current + 1])) {
+        tokens.push(createTextToken(char));
+        current++;
+        continue;
+      }
+
+      let content = '';
+      while (
+        current < input.length - 1 &&
+        !RIGHT_PARENTHESES.test(input[current + 1])
+      ) {
+        content += input[++current];
+      }
+
+      const maybeRightParen = input[++current];
+      if (RIGHT_PARENTHESES.test(maybeRightParen)) {
+        tokens.push(createParenContentToken(content));
+      } else {
+        tokens.push(createTextToken('('));
+        tokens.push(createTextToken(content));
+      }
+      current++;
+      continue;
+    }
+
+    if (RIGHT_PARENTHESES.test(char)) {
+      tokens.push(createTextToken(char));
+      current++;
+      continue;
+    }
+
+    // square paren content
+    if (LEFT_SQUARE_PARENTHESES.test(char)) {
+      // series of left square paren: [[dd]
+      if (LEFT_SQUARE_PARENTHESES.test(input[current + 1])) {
+        tokens.push(createTextToken(char));
+        current++;
+        continue;
+      }
+
+      let content = '';
+      while (
+        current < input.length - 1 &&
+        !RIGHT_SQUARE_PARENTHESES.test(input[current + 1])
+      ) {
+        content += input[++current];
+      }
+
+      const mayBeRightSquareParen = input[++current];
+      if (RIGHT_SQUARE_PARENTHESES.test(mayBeRightSquareParen)) {
+        tokens.push(createSquareParenContentToken(content));
+      } else {
+        tokens.push(createTextToken('['));
+        tokens.push(createTextToken(content));
+      }
+      current++;
+      continue;
+    }
+
+    if (RIGHT_SQUARE_PARENTHESES.test(char)) {
+      tokens.push(createTextToken(char));
       current++;
       continue;
     }
