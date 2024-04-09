@@ -2,7 +2,7 @@ export type SharpsToken = { type: 'sharps'; count: number; value: string };
 export type BackQuoteToken = { type: 'back-quote'; value: '`' };
 export type DashToken = { type: 'dash'; value: '-' };
 
-/**  for `pre` tag */
+/**  for `blockquote` tag */
 export type RightArrowToken = { type: 'right-arrow'; value: '>' };
 
 /**
@@ -60,9 +60,14 @@ export interface OrderListItemElement extends BaseElement {
   order: number;
 }
 
+export interface BlockquoteElement extends BaseElement {
+  type: 'blockquote';
+}
+
 export type MarkdownElement =
   | TextElement
   | ParagraphElement
   | HeadingElement
   | ListItemElement
+  | BlockquoteElement
   | OrderListItemElement;

@@ -19,6 +19,7 @@ import {
   OrderListItemElement,
   OrderToken,
   ParagraphElement,
+  BlockquoteElement,
   RightArrowToken,
   SharpsToken,
   SpacesToken,
@@ -197,6 +198,12 @@ export function createOrderListItemElement(
   return { type: 'order-list-item', order, children };
 }
 
+export function createBlockquoteElement(
+  children: BaseElement['children'] = []
+): BlockquoteElement {
+  return { type: 'blockquote', children };
+}
+
 export function createBaseTextElement(text: string): BaseTextElement {
   return { text };
 }
@@ -229,6 +236,8 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         elements.push(createInlineTextElement(token.value));
       } else if (token.type === 'order') {
         elements.push(createInlineTextElement(token.value.toString() + '.'));
+      } else if (token.type === 'right-arrow') {
+        elements.push(createInlineTextElement(token.value));
       } else if (token.type === 'back-quote') {
         // Skip back-quote
         current++;
@@ -288,6 +297,11 @@ export function parser(tokens: Token[]): MarkdownElement[] {
           current += 2;
           (blockElement as OrderListItemElement).type = 'order-list-item';
           (blockElement as OrderListItemElement).order = token.value;
+        }
+      } else if (token.type === 'right-arrow') {
+        if (isNextSpaceToken) {
+          current += 2;
+          (blockElement as BlockquoteElement).type = 'blockquote';
         }
       }
       blockElement.children = walkInlineElements();

@@ -2,6 +2,7 @@ import {
   MarkdownElement,
   Token,
   createBackQuoteToken,
+  createBlockquoteElement,
   createDashToken,
   createHeadingElement,
   createInlineCodeElement,
@@ -281,6 +282,31 @@ describe('markdown parser', () => {
       createParagraphElement([
         createInlineTextElement('1.'),
         createInlineTextElement('Hello'),
+      ]),
+    ] satisfies MarkdownElement[]);
+  });
+
+  it('should contain a blockquote element', () => {
+    expect(parser(tokenizer('> hello'))).toEqual([
+      createBlockquoteElement([createInlineTextElement('hello')]),
+    ] satisfies MarkdownElement[]);
+  });
+
+  it('should not contain any blockquote elements when there is no spaces after right arrow', () => {
+    expect(parser(tokenizer('>hello'))).toEqual([
+      createParagraphElement([
+        createInlineTextElement('>'),
+        createInlineTextElement('hello'),
+      ]),
+    ] satisfies MarkdownElement[]);
+  });
+
+  it('should not contain any blockquote elements when right arrow is not at the beginning of the line', () => {
+    expect(parser(tokenizer('hello>world'))).toEqual([
+      createParagraphElement([
+        createInlineTextElement('hello'),
+        createInlineTextElement('>'),
+        createInlineTextElement('world'),
       ]),
     ] satisfies MarkdownElement[]);
   });
