@@ -14,10 +14,8 @@ or install some vscode extensions like [vscode-jest-runner](https://marketplace.
 
 ## TODO
 
+- [ ] markdown tokenizer & parser
+  - [ ] image
 - [ ] markdown ast transformer
   - [x] merge texts
   - [ ] wrap list items with `bulleted-list` or `ordered-list`
-
-## Doing
-
-- markdown ast
