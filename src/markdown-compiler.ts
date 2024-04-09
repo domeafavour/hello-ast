@@ -252,28 +252,27 @@ export function parser(tokens: Token[]): MarkdownElement[] {
     const token = tokens[current];
     if (token.type !== 'line-break') {
       let blockElement = createBaseElement();
+      let nextToken = tokens[current + 1];
+      let isNextSpaceToken = nextToken && nextToken.type === 'spaces';
       // default type is paragraph
       (blockElement as ParagraphElement).type = 'paragraph';
       if (token.type === 'sharps') {
-        let nextToken = tokens[current + 1];
         // `# hello`
         // heading 1 `hello`
-        if (nextToken && nextToken.type === 'spaces') {
+        if (isNextSpaceToken) {
           // Skip current sharps and next spaces
           current += 2;
           (blockElement as HeadingElement).type = 'heading';
           (blockElement as HeadingElement).level = token.count;
         }
       } else if (token.type === 'dash') {
-        let nextToken = tokens[current + 1];
-        if (nextToken && nextToken.type === 'spaces') {
+        if (isNextSpaceToken) {
           // Skip current dash and next spaces
           current += 2;
           (blockElement as ListItemElement).type = 'list-item';
         }
       } else if (token.type === 'order') {
-        let nextToken = tokens[current + 1];
-        if (nextToken && nextToken.type === 'spaces') {
+        if (isNextSpaceToken) {
           current += 2;
           (blockElement as OrderListItemElement).type = 'order-list-item';
           (blockElement as OrderListItemElement).order = token.value;
