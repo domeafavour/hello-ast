@@ -128,6 +128,25 @@ describe('markdown compiler', () => {
     ] satisfies Token[]);
   });
 
+  it('should return correct order list items', () => {
+    expect(tokenizer('1. hello')).toEqual([
+      createOrderToken('1'),
+      createSpacesToken(1),
+      createTextToken('hello'),
+    ] satisfies Token[]);
+
+    expect(tokenizer('1.hello')).toEqual([
+      createTextToken('1'),
+      createTextToken('.hello'),
+    ] satisfies Token[]);
+
+    expect(tokenizer('1 hello')).toEqual([
+      createTextToken('1'),
+      createSpacesToken(1),
+      createTextToken('hello'),
+    ] satisfies Token[]);
+  });
+
   it('with ordered list', () => {
     expect(tokenizer('# Ordered List\n\n1. Hello World\n2. Coding')).toEqual([
       createSharpsToken(1),
@@ -147,10 +166,13 @@ describe('markdown compiler', () => {
       createSpacesToken(1),
       createTextToken('Coding'),
     ] satisfies Token[]);
+  });
 
-    expect(tokenizer('1.hello')).toEqual([
-      createOrderToken('1'),
-      createTextToken('hello'),
+  it('order text length is longer than 1', () => {
+    expect(tokenizer('100. Hello')).toEqual([
+      createOrderToken('100'),
+      createSpacesToken(1),
+      createTextToken('Hello'),
     ] satisfies Token[]);
   });
 });
@@ -280,8 +302,8 @@ describe('markdown parser', () => {
     const elements = parser(tokens);
     expect(elements).toEqual([
       createParagraphElement([
-        createInlineTextElement('1.'),
-        createInlineTextElement('Hello'),
+        createInlineTextElement('1'),
+        createInlineTextElement('.Hello'),
       ]),
     ] satisfies MarkdownElement[]);
   });

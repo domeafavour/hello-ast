@@ -115,12 +115,25 @@ export function tokenizer(input: string): Token[] {
     }
 
     if (NUMBER.test(char)) {
-      if (input[current + 1] === '.') {
-        tokens.push(createOrderToken(char));
-        // Skip number and dot
-        current += 2;
-        continue;
+      let num: string = char;
+      while (NUMBER.test(input[current + 1])) {
+        num += input[++current];
       }
+
+      const maybeDot = input[current + 1];
+
+      // `1. hello` => yes, order + space + text
+      // `1.hello` => no, text(number) + text
+      // `1 hello` => no, text + space + text
+      if (maybeDot === '.' && input[current + 2] === ' ') {
+        // Skip the dot
+        current++;
+        tokens.push(createOrderToken(num));
+      } else {
+        tokens.push(createTextToken(num));
+      }
+      current++;
+      continue;
     }
 
     if (TEXT.test(char)) {
