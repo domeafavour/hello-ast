@@ -16,6 +16,7 @@ or install some vscode extensions like [vscode-jest-runner](https://marketplace.
 
 - [ ] markdown tokenizer & parser
   - [ ] link
+    - [ ] link text tokens
   - [ ] image
 - [ ] markdown ast transformer
   - [x] merge texts
