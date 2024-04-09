@@ -2,6 +2,9 @@ export type SharpsToken = { type: 'sharps'; count: number; value: string };
 export type BackQuoteToken = { type: 'back-quote'; value: '`' };
 export type DashToken = { type: 'dash'; value: '-' };
 
+/**  for `pre` tag */
+export type RightArrowToken = { type: 'right-arrow'; value: '>' };
+
 /**
  * 1. xxx
  * 2. xxx
@@ -14,6 +17,7 @@ export type TextToken = { type: 'text'; value: string };
 export type Token =
   | SharpsToken
   | DashToken
+  | RightArrowToken
   | OrderToken
   | SpacesToken
   | BackQuoteToken

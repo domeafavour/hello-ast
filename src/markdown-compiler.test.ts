@@ -11,6 +11,7 @@ import {
   createOrderListItemElement,
   createOrderToken,
   createParagraphElement,
+  createRightArrowToken,
   createSharpsToken,
   createSpacesToken,
   createTextToken,
@@ -28,6 +29,14 @@ describe('markdown compiler', () => {
       createBackQuoteToken(),
       createTextToken('code'),
       createBackQuoteToken(),
+    ] satisfies Token[]);
+  });
+
+  it('should contain a right arrow token', () => {
+    expect(tokenizer('> hello')).toEqual([
+      createRightArrowToken(),
+      createSpacesToken(1),
+      createTextToken('hello'),
     ] satisfies Token[]);
   });
 

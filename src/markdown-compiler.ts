@@ -19,6 +19,7 @@ import {
   OrderListItemElement,
   OrderToken,
   ParagraphElement,
+  RightArrowToken,
   SharpsToken,
   SpacesToken,
   TextElement,
@@ -53,8 +54,9 @@ const WHITESPACE = / /;
 const LINE_BREAK = /\n/;
 const DASH = /-/;
 const NUMBER = /[0-9]/;
+const RIGHT_ARROW = />/;
 
-const TEXT = /[^# \n`]/;
+const TEXT = /[^# \n>`]/;
 
 export function createSharpsToken(count: number): SharpsToken {
   return { type: 'sharps', count, value: '#'.repeat(count) };
@@ -84,6 +86,10 @@ export function createBackQuoteToken(): BackQuoteToken {
   return { type: 'back-quote', value: '`' };
 }
 
+export function createRightArrowToken(): RightArrowToken {
+  return { type: 'right-arrow', value: '>' };
+}
+
 export function tokenizer(input: string): Token[] {
   const tokens: Token[] = [];
   let current = 0;
@@ -108,6 +114,12 @@ export function tokenizer(input: string): Token[] {
         char = input[++current];
       }
       tokens.push(createSpacesToken(count));
+      current++;
+      continue;
+    }
+
+    if (RIGHT_ARROW.test(char)) {
+      tokens.push(createRightArrowToken());
       current++;
       continue;
     }
