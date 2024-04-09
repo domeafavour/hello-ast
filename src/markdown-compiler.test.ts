@@ -339,6 +339,31 @@ describe('markdown parser', () => {
     ] satisfies MarkdownElement[]);
   });
 
+  // it('a paragraph with one inline code text only', () => {
+  //   expect(parser(tokenizer('`Hello World`'))).toEqual([
+  //     {
+  //       type: 'paragraph',
+  //       children: [
+  //         //
+  //         { type: 'inline-code', text: 'Hello World' },
+  //       ],
+  //     },
+  //   ] satisfies MarkdownElement[]);
+  // });
+
+  it('should not contain a inline code text while there is only one back quote', () => {
+    expect(parser(tokenizer('Hello `World'))).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', text: 'Hello' },
+          { type: 'text', text: ' ' },
+          { type: 'text', text: '`World' },
+        ],
+      },
+    ] satisfies MarkdownElement[]);
+  });
+
   it('should contain a paragraph element with text and inline code elements inside', () => {
     const tokens = tokenizer('# Hello `World`');
     const elements = parser(tokens);

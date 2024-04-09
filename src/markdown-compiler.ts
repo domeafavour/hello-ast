@@ -7,8 +7,12 @@
 
 import {
   BackQuoteToken,
+  BaseElement,
+  BaseTextElement,
   DashToken,
   HeadingElement,
+  InlineCodeElement,
+  InlineTextElement,
   LineBreakToken,
   ListItemElement,
   MarkdownElement,
@@ -181,20 +185,29 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         // Skip back-quote
         current++;
 
-        let text = '';
+        const inlineText: BaseTextElement = {
+          text: '',
+        };
+
+        // Collect text until next back-quote or line-break
         while (tokens[current] && tokens[current].type !== 'back-quote') {
           // TODO: token text resolver
           const textToken = tokens[current++] as TextToken;
-          text += textToken.text;
+          inlineText.text += textToken.text;
         }
 
         // Add this inline code element if the next token is back-quote
         // `code` => yes
         // `code  => no
-        if (tokens[current].type === 'back-quote') {
-          current++;
-          elements.push({ type: 'inline-code', text: text });
+        if (tokens[current] && tokens[current].type === 'back-quote') {
+          (inlineText as InlineCodeElement).type = 'inline-code';
+        } else {
+          (inlineText as InlineTextElement).type = 'text';
+          // Prepend the skipped back-quote
+          inlineText.text = '`' + inlineText.text;
         }
+        current++;
+        elements.push(inlineText as TextElement);
       }
       current++;
     }
