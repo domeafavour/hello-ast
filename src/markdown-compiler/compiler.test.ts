@@ -18,7 +18,7 @@ import {
   createTextToken,
   parser,
   tokenizer,
-} from './markdown-compiler';
+} from './compiler';
 
 describe('markdown compiler', () => {
   it('should return an empty token list', () => {

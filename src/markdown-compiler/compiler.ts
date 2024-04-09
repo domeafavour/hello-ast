@@ -26,9 +26,9 @@ import {
   TextElement,
   TextToken,
   Token,
-} from './markdown-compiler.typings';
+} from './typings';
 
-export * from './markdown-compiler.typings';
+export * from './typings';
 
 // # Hello World\nI am ok.
 // { type: "sharps", count: 1 }
