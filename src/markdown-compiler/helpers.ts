@@ -6,6 +6,7 @@ import {
   DashToken,
   HeadingElement,
   InlineCodeElement,
+  InlineLinkElement,
   InlineTextElement,
   LineBreakToken,
   ListItemElement,
@@ -129,6 +130,13 @@ export function createInlineCodeElement(text: string): InlineCodeElement {
   const baseText = createBaseTextElement(text) as InlineCodeElement;
   baseText.type = 'inline-code';
   return baseText;
+}
+
+export function createInlineLinkElement(
+  href: string,
+  children: BaseElement['children'] = []
+): InlineLinkElement {
+  return { type: 'link', href, children };
 }
 
 export function mergeInlineTexts(texts: TextElement[]): TextElement[] {

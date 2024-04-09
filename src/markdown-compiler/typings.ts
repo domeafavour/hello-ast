@@ -45,7 +45,16 @@ export interface InlineCodeElement extends BaseTextElement {
   type: 'inline-code';
 }
 
-export type TextElement = InlineTextElement | InlineCodeElement;
+// TODO: InlineElement
+export type TextElement =
+  | InlineTextElement
+  | InlineCodeElement
+  | InlineLinkElement;
+
+export interface InlineLinkElement extends BaseElement {
+  type: 'link';
+  href: string;
+}
 
 export interface BaseElement {
   children: TextElement[];

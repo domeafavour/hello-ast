@@ -14,6 +14,7 @@ import {
   createBaseElement,
   createBaseTextElement,
   createDashToken,
+  createInlineLinkElement,
   createInlineTextElement,
   createLineBreakToken,
   createOrderToken,
@@ -217,6 +218,25 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         elements.push(createInlineTextElement(token.value.toString() + '.'));
       } else if (token.type === 'right-arrow') {
         elements.push(createInlineTextElement(token.value));
+      } else if (token.type === 'square-paren-content') {
+        const mayBeParenContent = tokens[current + 1];
+        if (mayBeParenContent && mayBeParenContent.type === 'paren-content') {
+          elements.push(
+            createInlineLinkElement(mayBeParenContent.value, [
+              createInlineTextElement(token.value),
+            ])
+          );
+        } else {
+          elements.push(createInlineTextElement('[' + token.value + ']'));
+        }
+      } else if (token.type === 'paren-content') {
+        const mayBeSquareParenContent = tokens[current - 1];
+        if (
+          !mayBeSquareParenContent ||
+          mayBeSquareParenContent.type !== 'square-paren-content'
+        ) {
+          elements.push(createInlineTextElement('(' + token.value + ')'));
+        }
       } else if (token.type === 'back-quote') {
         // Skip back-quote
         current++;

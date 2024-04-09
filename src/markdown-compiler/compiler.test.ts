@@ -7,6 +7,7 @@ import {
   createDashToken,
   createHeadingElement,
   createInlineCodeElement,
+  createInlineLinkElement,
   createInlineTextElement,
   createLineBreakToken,
   createListItemElement,
@@ -405,6 +406,72 @@ describe('markdown parser', () => {
         createInlineTextElement('hello'),
         createInlineTextElement('>'),
         createInlineTextElement('world'),
+      ]),
+    ] satisfies MarkdownElement[]);
+  });
+
+  it('should contain a inline link element', () => {
+    expect(
+      parser(tokenizer('This is a [link](https://www.google.com)'))
+    ).toEqual([
+      createParagraphElement([
+        createInlineTextElement('This'),
+        createInlineTextElement(' '),
+        createInlineTextElement('is'),
+        createInlineTextElement(' '),
+        createInlineTextElement('a'),
+        createInlineTextElement(' '),
+        createInlineLinkElement('https://www.google.com', [
+          createInlineTextElement('link'),
+        ]),
+      ]),
+    ] satisfies MarkdownElement[]);
+  });
+
+  it('should not contain any inline links', () => {
+    expect(
+      parser(tokenizer('This is a [link](https://www.google.com'))
+    ).toEqual([
+      createParagraphElement([
+        createInlineTextElement('This'),
+        createInlineTextElement(' '),
+        createInlineTextElement('is'),
+        createInlineTextElement(' '),
+        createInlineTextElement('a'),
+        createInlineTextElement(' '),
+        createInlineTextElement('[link]'),
+        createInlineTextElement('('),
+        createInlineTextElement('https://www.google.com'),
+      ]),
+    ] satisfies MarkdownElement[]);
+
+    expect(parser(tokenizer('This is a [link(https://www.google.com'))).toEqual(
+      [
+        createParagraphElement([
+          createInlineTextElement('This'),
+          createInlineTextElement(' '),
+          createInlineTextElement('is'),
+          createInlineTextElement(' '),
+          createInlineTextElement('a'),
+          createInlineTextElement(' '),
+          createInlineTextElement('['),
+          createInlineTextElement('link(https://www.google.com'),
+        ]),
+      ] satisfies MarkdownElement[]
+    );
+
+    expect(
+      parser(tokenizer('This is a [link(https://www.google.com)'))
+    ).toEqual([
+      createParagraphElement([
+        createInlineTextElement('This'),
+        createInlineTextElement(' '),
+        createInlineTextElement('is'),
+        createInlineTextElement(' '),
+        createInlineTextElement('a'),
+        createInlineTextElement(' '),
+        createInlineTextElement('['),
+        createInlineTextElement('link(https://www.google.com)'),
       ]),
     ] satisfies MarkdownElement[]);
   });
