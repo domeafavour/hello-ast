@@ -152,15 +152,17 @@ export function tokenizer(input: string): Token[] {
   return tokens;
 }
 
-export type InlineTextElement = {
-  type: 'text';
-  value: string;
-};
+export interface BaseTextElement {
+  text: string;
+}
 
-export type InlineCodeElement = {
+export interface InlineTextElement extends BaseTextElement {
+  type: 'text';
+}
+
+export interface InlineCodeElement extends BaseTextElement {
   type: 'inline-code';
-  value: string;
-};
+}
 
 export type TextElement = InlineTextElement | InlineCodeElement;
 
@@ -218,9 +220,9 @@ export function parser(tokens: Token[]): MarkdownElement[] {
     while (tokens[current] && tokens[current].type !== 'line-break') {
       const token = tokens[current];
       if (token.type === 'text') {
-        elements.push({ type: 'text', value: token.text });
+        elements.push({ type: 'text', text: token.text });
       } else if (token.type === 'spaces') {
-        elements.push({ type: 'text', value: ' '.repeat(token.count) });
+        elements.push({ type: 'text', text: ' '.repeat(token.count) });
       } else if (token.type === 'back-quote') {
         // Skip back-quote
         current++;
@@ -237,7 +239,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         // `code  => no
         if (tokens[current].type === 'back-quote') {
           current++;
-          elements.push({ type: 'inline-code', value: text });
+          elements.push({ type: 'inline-code', text: text });
         }
       }
       current++;
@@ -264,13 +266,13 @@ export function parser(tokens: Token[]): MarkdownElement[] {
         current++;
         // `#hello`
         // text `#`
-        return { type: 'text', value: '#'.repeat(token.count) };
+        return { type: 'text', text: '#'.repeat(token.count) };
       }
     }
 
     if (token.type === 'text') {
       const previous = tokens[current - 1];
-      const text: TextElement = { type: 'text', value: token.text };
+      const text: TextElement = { type: 'text', text: token.text };
 
       current++;
       // The start of first line or a new line
@@ -291,7 +293,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
 
     if (token.type === 'spaces') {
       current++;
-      return { type: 'text', value: ' '.repeat(token.count) };
+      return { type: 'text', text: ' '.repeat(token.count) };
     }
 
     if (token.type === 'dash') {

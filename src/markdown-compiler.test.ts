@@ -324,15 +324,15 @@ describe('markdown parser', () => {
         children: [
           {
             type: 'text',
-            value: 'Hello',
+            text: 'Hello',
           },
           {
             type: 'text',
-            value: ' ',
+            text: ' ',
           },
           {
             type: 'text',
-            value: 'World',
+            text: 'World',
           },
         ],
       },
@@ -347,9 +347,9 @@ describe('markdown parser', () => {
         type: 'heading',
         level: 1,
         children: [
-          { type: 'text', value: 'Hello' },
-          { type: 'text', value: ' ' },
-          { type: 'inline-code', value: 'World' },
+          { type: 'text', text: 'Hello' },
+          { type: 'text', text: ' ' },
+          { type: 'inline-code', text: 'World' },
         ],
       },
     ] satisfies MarkdownElement[]);
@@ -365,15 +365,15 @@ describe('markdown parser', () => {
         children: [
           {
             type: 'text',
-            value: 'Hello',
+            text: 'Hello',
           },
           {
             type: 'text',
-            value: ' ',
+            text: ' ',
           },
           {
             type: 'text',
-            value: 'World',
+            text: 'World',
           },
         ],
       },
@@ -390,15 +390,15 @@ describe('markdown parser', () => {
         children: [
           {
             type: 'text',
-            value: 'Hello',
+            text: 'Hello',
           },
           {
             type: 'text',
-            value: ' ',
+            text: ' ',
           },
           {
             type: 'text',
-            value: 'World',
+            text: 'World',
           },
         ],
       },
@@ -407,23 +407,23 @@ describe('markdown parser', () => {
         children: [
           {
             type: 'text',
-            value: 'I',
+            text: 'I',
           },
           {
             type: 'text',
-            value: ' ',
+            text: ' ',
           },
           {
             type: 'text',
-            value: 'am',
+            text: 'am',
           },
           {
             type: 'text',
-            value: ' ',
+            text: ' ',
           },
           {
             type: 'text',
-            value: 'ok.',
+            text: 'ok.',
           },
         ],
       },
@@ -439,24 +439,15 @@ describe('markdown parser', () => {
         children: [
           {
             type: 'text',
-            value: 'Hello',
+            text: 'Hello',
           },
           {
             type: 'text',
-            value: ' ',
+            text: ' ',
           },
           {
             type: 'text',
-            value: 'World',
-          },
-        ],
-      },
-      {
-        type: 'list-item',
-        children: [
-          {
-            type: 'text',
-            value: 'Coding',
+            text: 'World',
           },
         ],
       },
@@ -465,7 +456,16 @@ describe('markdown parser', () => {
         children: [
           {
             type: 'text',
-            value: 'Ha',
+            text: 'Coding',
+          },
+        ],
+      },
+      {
+        type: 'list-item',
+        children: [
+          {
+            type: 'text',
+            text: 'Ha',
           },
         ],
       },
@@ -479,8 +479,8 @@ describe('markdown parser', () => {
       {
         type: 'paragraph',
         children: [
-          { type: 'text', value: '-' },
-          { type: 'text', value: 'Hello' },
+          { type: 'text', text: '-' },
+          { type: 'text', text: 'Hello' },
         ],
       },
     ] satisfies MarkdownElement[]);
@@ -496,15 +496,15 @@ describe('markdown parser', () => {
         children: [
           {
             type: 'text',
-            value: 'Hello',
+            text: 'Hello',
           },
           {
             type: 'text',
-            value: ' ',
+            text: ' ',
           },
           {
             type: 'text',
-            value: 'World',
+            text: 'World',
           },
         ],
       },
@@ -514,7 +514,7 @@ describe('markdown parser', () => {
         children: [
           {
             type: 'text',
-            value: 'Coding',
+            text: 'Coding',
           },
         ],
       },
@@ -524,7 +524,7 @@ describe('markdown parser', () => {
         children: [
           {
             type: 'text',
-            value: 'Ha',
+            text: 'Ha',
           },
         ],
       },
@@ -538,8 +538,8 @@ describe('markdown parser', () => {
       {
         type: 'paragraph',
         children: [
-          { type: 'text', value: '1.' },
-          { type: 'text', value: 'Hello' },
+          { type: 'text', text: '1.' },
+          { type: 'text', text: 'Hello' },
         ],
       },
     ] satisfies MarkdownElement[]);
