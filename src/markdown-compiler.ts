@@ -153,20 +153,30 @@ export function tokenizer(input: string): Token[] {
   return tokens;
 }
 
-function createHeadingElement(level: number): HeadingElement {
-  return { type: 'heading', level, children: [] };
+export function createHeadingElement(
+  level: number,
+  children: BaseElement['children'] = []
+): HeadingElement {
+  return { type: 'heading', level, children };
 }
 
-function createParagraphElement(): ParagraphElement {
-  return { type: 'paragraph', children: [] };
+export function createParagraphElement(
+  children: BaseElement['children'] = []
+): ParagraphElement {
+  return { type: 'paragraph', children };
 }
 
-function createListItemElement(): ListItemElement {
-  return { type: 'list-item', children: [] };
+export function createListItemElement(
+  children: BaseElement['children'] = []
+): ListItemElement {
+  return { type: 'list-item', children };
 }
 
-function createOrderListItemElement(order: number): OrderListItemElement {
-  return { type: 'order-list-item', order, children: [] };
+export function createOrderListItemElement(
+  order: number,
+  children: BaseElement['children'] = []
+): OrderListItemElement {
+  return { type: 'order-list-item', order, children };
 }
 
 export function parser(tokens: Token[]): MarkdownElement[] {
@@ -221,14 +231,9 @@ export function parser(tokens: Token[]): MarkdownElement[] {
       // `# hello`
       // heading 1 `hello`
       if (nextToken && nextToken.type === 'spaces') {
-        const headingElement = createHeadingElement(token.count);
-
         // Skip current sharps and next spaces
         current += 2;
-
-        headingElement.children = walkInlineElements();
-
-        return headingElement;
+        return createHeadingElement(token.count, walkInlineElements());
       } else {
         current++;
         // `#hello`
@@ -244,11 +249,7 @@ export function parser(tokens: Token[]): MarkdownElement[] {
       current++;
       // The start of first line or a new line
       if (!previous || previous.type === 'line-break') {
-        const paragraphElement: ParagraphElement = createParagraphElement();
-        paragraphElement.children.push(text);
-        paragraphElement.children.push(...walkInlineElements());
-
-        return paragraphElement;
+        return createParagraphElement([text, ...walkInlineElements()]);
       }
       return text;
     }
@@ -270,15 +271,11 @@ export function parser(tokens: Token[]): MarkdownElement[] {
       // `- item`
       // bulleted list item
       if (next && next.type === 'spaces') {
-        const itemElement = createListItemElement();
-
         // Skip current dash and next spaces
         // `- item` => `item`
         current += 2;
 
-        itemElement.children = walkInlineElements();
-
-        return itemElement;
+        return createListItemElement(walkInlineElements());
       } else {
         tokens[current] = createTextToken('-');
         return walkBlockElements();
@@ -289,13 +286,9 @@ export function parser(tokens: Token[]): MarkdownElement[] {
       const next = tokens[current + 1];
 
       if (next && next.type === 'spaces') {
-        const orderElement = createOrderListItemElement(token.value);
-
         current += 2;
 
-        orderElement.children = walkInlineElements();
-
-        return orderElement;
+        return createOrderListItemElement(token.value, walkInlineElements());
       } else {
         // reuse `text` logic
         tokens[current] = createTextToken(token.value.toString() + '.');
