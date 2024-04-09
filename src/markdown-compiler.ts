@@ -1,31 +1,28 @@
-export type SharpsToken = { type: 'sharps'; count: number };
-export type BackQuoteToken = { type: 'back-quote'; value: '`' };
-export type DashToken = { type: 'dash' };
-
-/**
- * 1. xxx
- * 2. xxx
- * 3. xxx
- */
-export type OrderToken = { type: 'order'; value: number };
-export type SpacesToken = { type: 'spaces'; count: number };
-export type LineBreakToken = { type: 'line-break' };
-export type TextToken = { type: 'text'; text: string };
-export type Token =
-  | SharpsToken
-  | DashToken
-  | OrderToken
-  | SpacesToken
-  | BackQuoteToken
-  | LineBreakToken
-  | TextToken;
-
 // # Hello World
 // { type: "sharps", count: 1 }
 // { type: "spaces", count: 1 }
 // { type: "text", text: "Hello" }
 // { type: "spaces", count: 1 }
 // { type: "text", text: "World" }
+
+import {
+  BackQuoteToken,
+  DashToken,
+  HeadingElement,
+  LineBreakToken,
+  ListItemElement,
+  MarkdownElement,
+  OrderListItemElement,
+  OrderToken,
+  ParagraphElement,
+  SharpsToken,
+  SpacesToken,
+  TextElement,
+  TextToken,
+  Token,
+} from './markdown-compiler.typings';
+
+export * from './markdown-compiler.typings';
 
 // # Hello World\nI am ok.
 // { type: "sharps", count: 1 }
@@ -151,49 +148,6 @@ export function tokenizer(input: string): Token[] {
 
   return tokens;
 }
-
-export interface BaseTextElement {
-  text: string;
-}
-
-export interface InlineTextElement extends BaseTextElement {
-  type: 'text';
-}
-
-export interface InlineCodeElement extends BaseTextElement {
-  type: 'inline-code';
-}
-
-export type TextElement = InlineTextElement | InlineCodeElement;
-
-export type HeadingElement = {
-  type: 'heading';
-  level: number;
-  children: TextElement[];
-};
-
-export type ParagraphElement = {
-  type: 'paragraph';
-  children: TextElement[];
-};
-
-export type ListItemElement = {
-  type: 'list-item';
-  children: TextElement[];
-};
-
-export type OrderListItemElement = {
-  type: 'order-list-item';
-  order: number;
-  children: TextElement[];
-};
-
-export type MarkdownElement =
-  | TextElement
-  | ParagraphElement
-  | HeadingElement
-  | ListItemElement
-  | OrderListItemElement;
 
 function createHeadingElement(level: number): HeadingElement {
   return { type: 'heading', level, children: [] };
